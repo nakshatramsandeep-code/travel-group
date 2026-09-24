@@ -30,7 +30,12 @@ status, generates options, and locks the final decision.
    SUPABASE_URL=            # Project Settings > API > Project URL
    SUPABASE_ANON_KEY=       # Project Settings > API > anon public key
    GEMINI_API_KEY=          # https://aistudio.google.com/apikey
+   GEMINI_MODEL=            # optional, defaults to gemini-flash-latest
    ```
+
+   If you see a Gemini `503 UNAVAILABLE` / "high demand" error, try setting
+   `GEMINI_MODEL` to a different model (e.g. `gemini-2.5-flash`,
+   `gemini-3.5-flash`) without touching code.
 
 4. Run the dev server:
 

@@ -103,7 +103,7 @@ export async function generateTripOptions(
   let rawText: string;
   try {
     const result = await ai.models.generateContent({
-      model: "gemini-flash-latest",
+      model: process.env.GEMINI_MODEL || "gemini-flash-latest",
       contents: prompt,
       config: {
         responseMimeType: "application/json",
