@@ -12,14 +12,14 @@ export default function StatusList({
         return (
           <li
             key={name}
-            className="flex items-center justify-between rounded-lg border border-neutral-800 bg-neutral-900/60 px-3 py-2"
+            className="flex items-center justify-between rounded-lg border border-black/10 bg-white px-3 py-2"
           >
-            <span className="text-neutral-200 text-sm">{name}</span>
+            <span className="text-neutral-800 text-sm">{name}</span>
             <span
               className={`text-xs font-medium px-2 py-1 rounded-full ${
                 submitted
-                  ? "bg-emerald-950/60 text-emerald-400 border border-emerald-900"
-                  : "bg-neutral-800 text-neutral-500 border border-neutral-700"
+                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  : "bg-black/[0.03] text-neutral-500 border border-black/10"
               }`}
             >
               {submitted ? "Submitted" : "Waiting"}

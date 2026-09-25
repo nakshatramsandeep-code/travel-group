@@ -194,7 +194,7 @@ export default function PreferenceForm({
   return (
     <div className="flex flex-col gap-5">
       {isReadOnly && (
-        <p className="text-sm text-amber-300 bg-amber-950/40 border border-amber-900 rounded-lg px-3 py-2">
+        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
           {isLocked
             ? "This trip's decision is locked — submissions are closed."
             : "The submission deadline has passed."}
@@ -202,8 +202,8 @@ export default function PreferenceForm({
       )}
 
       <div>
-        <label className="flex items-center gap-1.5 text-sm font-medium text-neutral-200 mb-1.5">
-          <UserIcon className="h-4 w-4 text-neutral-500" />
+        <label className="flex items-center gap-1.5 text-sm font-medium text-neutral-700 mb-1.5">
+          <UserIcon className="h-4 w-4 text-neutral-400" />
           Which one are you?
         </label>
         <div className="relative">
@@ -211,7 +211,7 @@ export default function PreferenceForm({
             value={memberName}
             onChange={(e) => setMemberName(e.target.value)}
             disabled={isReadOnly}
-            className="w-full appearance-none rounded-xl border border-neutral-700 bg-neutral-900 px-3.5 py-3 pr-9 text-neutral-100 focus:border-emerald-500 focus:outline-none disabled:opacity-60"
+            className="w-full appearance-none rounded-xl border border-black/15 bg-white px-3.5 py-3 pr-9 text-neutral-900 focus:border-emerald-600 focus:outline-none disabled:opacity-60"
           >
             <option value="">Select your name</option>
             {memberNames.map((n) => (
@@ -223,7 +223,7 @@ export default function PreferenceForm({
           <svg
             viewBox="0 0 24 24"
             fill="none"
-            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500"
+            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
           >
             <path
               d="M6 9l6 6 6-6"
@@ -243,7 +243,7 @@ export default function PreferenceForm({
           )}
 
           {hasExisting && !loadingExisting && (
-            <p className="flex items-center gap-1.5 text-xs text-emerald-400">
+            <p className="flex items-center gap-1.5 text-xs text-emerald-700">
               <CheckIcon className="h-3.5 w-3.5" />
               You&apos;ve already submitted — editing will update your answers.
             </p>
@@ -253,14 +253,14 @@ export default function PreferenceForm({
             disabled={isReadOnly || loadingExisting}
             className="flex flex-col gap-4"
           >
-            <section className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-200 mb-3">
-                <WalletIcon className="h-4 w-4 text-emerald-500" />
+            <section className="rounded-xl border border-black/10 bg-black/[0.03] p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-800 mb-3">
+                <WalletIcon className="h-4 w-4 text-emerald-600" />
                 Budget per person (INR)
               </h3>
               <div className="flex gap-3">
                 <div className="relative w-1/2">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400">
                     ₹
                   </span>
                   <input
@@ -269,11 +269,11 @@ export default function PreferenceForm({
                     placeholder="Min"
                     value={budgetMin}
                     onChange={(e) => setBudgetMin(e.target.value)}
-                    className="w-full rounded-lg border border-neutral-700 bg-neutral-900 pl-7 pr-3 py-2.5 text-neutral-100 placeholder-neutral-500 focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-black/15 bg-white pl-7 pr-3 py-2.5 text-neutral-900 placeholder-neutral-400 focus:border-emerald-600 focus:outline-none"
                   />
                 </div>
                 <div className="relative w-1/2">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400">
                     ₹
                   </span>
                   <input
@@ -282,22 +282,22 @@ export default function PreferenceForm({
                     placeholder="Max"
                     value={budgetMax}
                     onChange={(e) => setBudgetMax(e.target.value)}
-                    className="w-full rounded-lg border border-neutral-700 bg-neutral-900 pl-7 pr-3 py-2.5 text-neutral-100 placeholder-neutral-500 focus:border-emerald-500 focus:outline-none"
+                    className="w-full rounded-lg border border-black/15 bg-white pl-7 pr-3 py-2.5 text-neutral-900 placeholder-neutral-400 focus:border-emerald-600 focus:outline-none"
                   />
                 </div>
               </div>
             </section>
 
-            <section className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-200 mb-3">
-                <CalendarIcon className="h-4 w-4 text-emerald-500" />
+            <section className="rounded-xl border border-black/10 bg-black/[0.03] p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-800 mb-3">
+                <CalendarIcon className="h-4 w-4 text-emerald-600" />
                 When are you available?
               </h3>
               <div className="flex flex-col gap-2">
                 {dateRanges.map((r, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-900/60 p-2"
+                    className="flex items-center gap-2 rounded-lg border border-black/10 bg-white p-2"
                   >
                     <input
                       type="date"
@@ -305,9 +305,9 @@ export default function PreferenceForm({
                       onChange={(e) =>
                         updateRange(idx, "start", e.target.value)
                       }
-                      className="min-w-0 flex-1 rounded-md border border-neutral-700 bg-neutral-900 px-2.5 py-2 text-sm text-neutral-100 focus:border-emerald-500 focus:outline-none"
+                      className="min-w-0 flex-1 rounded-md border border-black/15 bg-white px-2.5 py-2 text-sm text-neutral-900 focus:border-emerald-600 focus:outline-none"
                     />
-                    <span className="shrink-0 text-neutral-500 text-xs">
+                    <span className="shrink-0 text-neutral-400 text-xs">
                       to
                     </span>
                     <input
@@ -316,13 +316,13 @@ export default function PreferenceForm({
                       onChange={(e) =>
                         updateRange(idx, "end", e.target.value)
                       }
-                      className="min-w-0 flex-1 rounded-md border border-neutral-700 bg-neutral-900 px-2.5 py-2 text-sm text-neutral-100 focus:border-emerald-500 focus:outline-none"
+                      className="min-w-0 flex-1 rounded-md border border-black/15 bg-white px-2.5 py-2 text-sm text-neutral-900 focus:border-emerald-600 focus:outline-none"
                     />
                     {dateRanges.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeRange(idx)}
-                        className="shrink-0 rounded-md p-1.5 text-neutral-500 hover:bg-red-950/40 hover:text-red-400 transition-colors"
+                        className="shrink-0 rounded-md p-1.5 text-neutral-400 hover:bg-red-50 hover:text-red-600 transition-colors"
                         aria-label="Remove date range"
                       >
                         ✕
@@ -333,16 +333,16 @@ export default function PreferenceForm({
                 <button
                   type="button"
                   onClick={addRange}
-                  className="self-start rounded-lg border border-dashed border-neutral-700 px-3 py-1.5 text-sm text-emerald-400 hover:border-emerald-600 hover:text-emerald-300 transition-colors"
+                  className="self-start rounded-lg border border-dashed border-black/20 px-3 py-1.5 text-sm text-emerald-700 hover:border-emerald-600 hover:text-emerald-800 transition-colors"
                 >
                   + Add another window
                 </button>
               </div>
             </section>
 
-            <section className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-200 mb-3">
-                <CompassIcon className="h-4 w-4 text-emerald-500" />
+            <section className="rounded-xl border border-black/10 bg-black/[0.03] p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-800 mb-3">
+                <CompassIcon className="h-4 w-4 text-emerald-600" />
                 What kind of trip?{" "}
                 <span className="font-normal text-neutral-500">
                   (pick all you&apos;d enjoy)
@@ -358,8 +358,8 @@ export default function PreferenceForm({
                       onClick={() => toggleDestinationType(d.value)}
                       className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm border transition-colors ${
                         active
-                          ? "bg-emerald-600 border-emerald-500 text-white"
-                          : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
+                          ? "bg-neutral-900 border-neutral-900 text-[#f5f5f2]"
+                          : "border-black/15 bg-white text-neutral-700 hover:border-black/30"
                       }`}
                     >
                       {active && <CheckIcon className="h-3.5 w-3.5" />}
@@ -370,9 +370,9 @@ export default function PreferenceForm({
               </div>
             </section>
 
-            <section className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-200 mb-3">
-                <BanIcon className="h-4 w-4 text-rose-500" />
+            <section className="rounded-xl border border-black/10 bg-black/[0.03] p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-800 mb-3">
+                <BanIcon className="h-4 w-4 text-rose-600" />
                 Hard no&apos;s
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -386,15 +386,15 @@ export default function PreferenceForm({
                       aria-pressed={active}
                       className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
                         active
-                          ? "bg-rose-950/50 border-rose-800 text-rose-200"
-                          : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
+                          ? "bg-rose-50 border-rose-300 text-rose-800"
+                          : "border-black/15 bg-white text-neutral-700 hover:border-black/30"
                       }`}
                     >
                       <span
                         className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
                           active
-                            ? "bg-rose-600 border-rose-500"
-                            : "border-neutral-600"
+                            ? "bg-rose-600 border-rose-600"
+                            : "border-neutral-300"
                         }`}
                       >
                         {active && (
@@ -411,17 +411,17 @@ export default function PreferenceForm({
                 onChange={(e) => setHardNoNotes(e.target.value)}
                 placeholder="Anything else you definitely don't want..."
                 rows={2}
-                className="mt-3 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-neutral-100 placeholder-neutral-500 focus:border-emerald-500 focus:outline-none"
+                className="mt-3 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:border-emerald-600 focus:outline-none"
               />
             </section>
 
             {error && (
-              <p className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-lg px-3 py-2">
+              <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                 {error}
               </p>
             )}
             {success && (
-              <p className="text-sm text-emerald-400 bg-emerald-950/40 border border-emerald-900 rounded-lg px-3 py-2">
+              <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
                 Saved! You can come back and edit until the deadline.
               </p>
             )}
@@ -429,7 +429,7 @@ export default function PreferenceForm({
             <button
               type="submit"
               disabled={saving}
-              className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-3 transition-colors"
+              className="w-full rounded-lg bg-neutral-900 hover:bg-neutral-700 disabled:opacity-60 disabled:cursor-not-allowed text-[#f5f5f2] font-medium py-3 transition-colors"
             >
               {saving ? "Saving..." : hasExisting ? "Update my answers" : "Submit"}
             </button>

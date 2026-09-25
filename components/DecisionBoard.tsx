@@ -104,7 +104,7 @@ export default function DecisionBoard({ shareToken }: { shareToken: string }) {
   }
 
   if (error && !data) {
-    return <p className="text-red-400 text-center">{error}</p>;
+    return <p className="text-red-600 text-center">{error}</p>;
   }
 
   if (!data) {
@@ -125,8 +125,8 @@ export default function DecisionBoard({ shareToken }: { shareToken: string }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="text-center">
-        <h1 className="text-2xl font-semibold text-white">{trip.name}</h1>
-        <p className="mt-1 text-sm text-neutral-400">
+        <h1 className="font-serif text-2xl text-neutral-900">{trip.name}</h1>
+        <p className="mt-1 text-sm text-neutral-500">
           {trip.status === "locked"
             ? "Decision locked"
             : trip.status === "options_generated"
@@ -136,7 +136,7 @@ export default function DecisionBoard({ shareToken }: { shareToken: string }) {
       </div>
 
       {trip.status === "collecting" && (
-        <p className="text-center text-sm text-neutral-500 bg-neutral-900/60 border border-neutral-800 rounded-xl px-4 py-6">
+        <p className="text-center text-sm text-neutral-500 bg-white border border-black/10 rounded-xl px-4 py-6 shadow-sm">
           Options haven&apos;t been generated yet. Check back once the
           coordinator has run it.
         </p>
@@ -148,11 +148,11 @@ export default function DecisionBoard({ shareToken }: { shareToken: string }) {
 
           {trip.status !== "locked" && (
             <div className="flex flex-wrap items-center gap-3">
-              <label className="text-sm text-neutral-400">Voting as</label>
+              <label className="text-sm text-neutral-600">Voting as</label>
               <select
                 value={voterName}
                 onChange={(e) => setVoterName(e.target.value)}
-                className="rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 focus:border-emerald-500 focus:outline-none"
+                className="rounded-lg border border-black/15 bg-white px-3 py-2 text-neutral-900 focus:border-emerald-600 focus:outline-none"
               >
                 <option value="">Select your name</option>
                 {trip.member_names.map((n) => (
@@ -170,7 +170,7 @@ export default function DecisionBoard({ shareToken }: { shareToken: string }) {
           )}
 
           {error && (
-            <p className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-lg px-3 py-2">
+            <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
               {error}
             </p>
           )}

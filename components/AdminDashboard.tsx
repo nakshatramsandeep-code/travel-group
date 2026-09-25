@@ -78,10 +78,10 @@ export default function AdminDashboard({
   const canGenerate = (allSubmitted || deadlinePassed) && trip.status !== "locked";
   const badgeClass =
     deadlineStatus.urgency === "passed"
-      ? "bg-neutral-800 text-neutral-400 border-neutral-700"
+      ? "bg-black/[0.04] text-neutral-500 border-black/10"
       : deadlineStatus.urgency === "soon"
-        ? "bg-amber-950/50 text-amber-300 border-amber-900"
-        : "bg-emerald-950/50 text-emerald-400 border-emerald-900";
+        ? "bg-amber-50 text-amber-800 border-amber-200"
+        : "bg-emerald-50 text-emerald-700 border-emerald-200";
 
   const shareUrl = origin ? `${origin}/t/${trip.share_token}` : "";
   const adminUrl = origin ? `${origin}/admin/${adminToken}` : "";
@@ -157,7 +157,7 @@ export default function AdminDashboard({
   return (
     <div className="flex flex-col gap-6">
       <div className="text-center">
-        <h1 className="text-2xl font-semibold text-white">{trip.name}</h1>
+        <h1 className="font-serif text-2xl text-neutral-900">{trip.name}</h1>
         <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
           <span
             className={`text-xs font-medium px-2.5 py-1 rounded-full border ${badgeClass}`}
@@ -170,7 +170,7 @@ export default function AdminDashboard({
         </div>
       </div>
 
-      <div className="bg-neutral-900/60 border border-neutral-800 rounded-2xl p-5 flex flex-col gap-3">
+      <div className="bg-white border border-black/10 rounded-2xl p-5 flex flex-col gap-3 shadow-sm">
         <p className="text-xs uppercase tracking-wide text-neutral-500">
           Share this link with the group
         </p>
@@ -178,11 +178,11 @@ export default function AdminDashboard({
           <input
             readOnly
             value={shareUrl}
-            className="flex-1 min-w-0 rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-300"
+            className="flex-1 min-w-0 rounded-lg border border-black/10 bg-black/[0.03] px-3 py-2 text-sm text-neutral-600"
           />
           <button
             onClick={() => copy(shareUrl, "share")}
-            className="shrink-0 rounded-lg border border-neutral-700 px-3 py-2 text-sm text-neutral-200 hover:border-emerald-500"
+            className="shrink-0 rounded-lg border border-black/15 px-3 py-2 text-sm text-neutral-700 hover:border-emerald-600"
           >
             {copied === "share" ? "Copied" : "Copy"}
           </button>
@@ -194,20 +194,20 @@ export default function AdminDashboard({
           <input
             readOnly
             value={adminUrl}
-            className="flex-1 min-w-0 rounded-lg border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-neutral-300"
+            className="flex-1 min-w-0 rounded-lg border border-black/10 bg-black/[0.03] px-3 py-2 text-sm text-neutral-600"
           />
           <button
             onClick={() => copy(adminUrl, "admin")}
-            className="shrink-0 rounded-lg border border-neutral-700 px-3 py-2 text-sm text-neutral-200 hover:border-emerald-500"
+            className="shrink-0 rounded-lg border border-black/15 px-3 py-2 text-sm text-neutral-700 hover:border-emerald-600"
           >
             {copied === "admin" ? "Copied" : "Copy"}
           </button>
         </div>
       </div>
 
-      <div className="bg-neutral-900/60 border border-neutral-800 rounded-2xl p-5 flex flex-col gap-4">
+      <div className="bg-white border border-black/10 rounded-2xl p-5 flex flex-col gap-4 shadow-sm">
         <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-neutral-200">
+          <p className="text-sm font-medium text-neutral-800">
             Submission status
           </p>
           {hasLoadedOnce && (
@@ -233,8 +233,8 @@ export default function AdminDashboard({
         {hasLoadedOnce && trip.status !== "locked" && (
           <>
             {confirmingRegenerate ? (
-              <div className="flex flex-col gap-2 rounded-lg border border-amber-900 bg-amber-950/30 p-3">
-                <p className="text-sm text-amber-300">
+              <div className="flex flex-col gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+                <p className="text-sm text-amber-800">
                   Regenerating will replace the current options and clear any
                   votes already cast. Continue?
                 </p>
@@ -249,7 +249,7 @@ export default function AdminDashboard({
                   <button
                     onClick={() => setConfirmingRegenerate(false)}
                     disabled={generating}
-                    className="flex-1 rounded-lg border border-neutral-700 text-neutral-300 hover:border-neutral-500 text-sm font-medium py-2 transition-colors"
+                    className="flex-1 rounded-lg border border-black/15 text-neutral-700 hover:border-black/30 text-sm font-medium py-2 transition-colors"
                   >
                     Cancel
                   </button>
@@ -259,7 +259,7 @@ export default function AdminDashboard({
               <button
                 onClick={handleGenerateClick}
                 disabled={!canGenerate || generating}
-                className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 transition-colors"
+                className="w-full rounded-lg bg-neutral-900 hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed text-[#f5f5f2] font-medium py-2.5 transition-colors"
               >
                 {generating
                   ? "Generating…"
@@ -276,7 +276,7 @@ export default function AdminDashboard({
           </p>
         )}
         {genError && (
-          <p className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-lg px-3 py-2">
+          <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
             {genError}
           </p>
         )}
@@ -310,7 +310,7 @@ export default function AdminDashboard({
                   <button
                     onClick={() => handleLock(opt.id)}
                     disabled={locking}
-                    className="rounded-lg border border-emerald-700 text-emerald-400 hover:bg-emerald-950/40 disabled:opacity-50 text-sm font-medium py-2 transition-colors"
+                    className="rounded-lg border border-emerald-600 text-emerald-700 hover:bg-emerald-50 disabled:opacity-50 text-sm font-medium py-2 transition-colors"
                   >
                     Confirm as final choice
                   </button>
