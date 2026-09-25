@@ -28,8 +28,10 @@ font) — it doesn't use any of Mojang's actual game assets, textures, or logo.
 
 2. Create a Supabase project, then run [`supabase/schema.sql`](supabase/schema.sql)
    in the Supabase SQL editor to create the tables. If your project already
-   existed before the itinerary feature was added, also run
-   [`supabase/migrations/002_add_itinerary.sql`](supabase/migrations/002_add_itinerary.sql).
+   existed before recent changes, also run any new files under
+   [`supabase/migrations/`](supabase/migrations) — currently
+   [`002_add_itinerary.sql`](supabase/migrations/002_add_itinerary.sql) and
+   [`003_drop_votes.sql`](supabase/migrations/003_drop_votes.sql).
 
 3. Copy `.env.example` to `.env.local` and fill in:
 
@@ -69,18 +71,18 @@ font) — it doesn't use any of Mojang's actual game assets, textures, or logo.
    person's max, and anything hitting a hard no removed. Those filtered
    constraints are handed to Gemini (`lib/gemini.ts`), which picks exactly
    **one** destination with a 0-10 fit score and one-line reason per person,
-   an estimated per-person cost, trade-offs, and a day-by-day itinerary. The
-   response is requested as strict JSON and validated with `zod` before
+   an approximate per-person budget, trade-offs, and a day-by-day itinerary.
+   The response is requested as strict JSON and validated with `zod` before
    saving — a bad or failed response surfaces as an error, never a
    fabricated result. No images are generated or stored; the recommendation
    is text-only.
 5. **Decision board** (`/t/[shareToken]/board`) — shows the single
-   recommendation as a quest card with dates, cost, itinerary, and
-   heart-based fit scores per person. Anyone with the link can vote once to
-   confirm it.
+   recommendation as a quest card with dates, approx budget, itinerary, and
+   heart-based fit scores per person. There's no voting — since only one
+   destination is recommended, the group simply reviews it.
 6. **Seal the quest** — the coordinator locks in the destination from the
    admin page. The board then shows it as sealed and further writes
-   (submissions, votes, re-rolling) are rejected.
+   (submissions, re-rolling) are rejected.
 
 ## Deploying to Vercel
 

@@ -63,7 +63,7 @@ export async function POST(
     throw err;
   }
 
-  // Clear previously generated options (and their votes, via cascade) before saving fresh ones.
+  // Clear the previous recommendation before saving the fresh one.
   await supabase.from("options").delete().eq("trip_id", trip.id);
 
   const rows = generated.options.map((opt, idx) => ({

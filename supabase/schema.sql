@@ -45,22 +45,12 @@ create table if not exists options (
   generated_at          timestamptz not null default now()
 );
 
-create table if not exists votes (
-  id            uuid primary key default gen_random_uuid(),
-  trip_id       uuid not null references trips(id) on delete cascade,
-  member_name   text not null,
-  option_id     uuid not null references options(id) on delete cascade,
-  voted_at      timestamptz not null default now(),
-  unique (trip_id, member_name)
-);
-
 alter table trips
   add constraint trips_locked_option_fk
   foreign key (locked_option_id) references options(id);
 
 create index if not exists submissions_trip_id_idx on submissions(trip_id);
 create index if not exists options_trip_id_idx on options(trip_id);
-create index if not exists votes_trip_id_idx on votes(trip_id);
 
 -- RLS: enabled with permissive policies since there is no auth layer.
 -- All real gatekeeping (deadline checks, lock checks, token checks) happens
@@ -68,9 +58,7 @@ create index if not exists votes_trip_id_idx on votes(trip_id);
 alter table trips enable row level security;
 alter table submissions enable row level security;
 alter table options enable row level security;
-alter table votes enable row level security;
 
 create policy "allow all trips" on trips for all using (true) with check (true);
 create policy "allow all submissions" on submissions for all using (true) with check (true);
 create policy "allow all options" on options for all using (true) with check (true);
-create policy "allow all votes" on votes for all using (true) with check (true);

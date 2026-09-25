@@ -8,22 +8,24 @@ function heartsForScore(score: number): number {
 
 export default function OptionCard({
   option,
-  voteCount,
   isWinner,
-  isLocked,
-  currentUserVoted,
-  onVote,
 }: {
   option: TripOption;
-  voteCount: number;
   isWinner: boolean;
-  isLocked: boolean;
-  currentUserVoted: boolean;
-  onVote?: () => void;
 }) {
   const scores = Object.entries(option.fit_scores ?? {});
   const costs = Object.entries(option.est_cost_per_person ?? {});
   const itinerary = option.itinerary ?? [];
+
+  const costValues = costs.map(([, cost]) => cost);
+  const avgCost =
+    costValues.length > 0
+      ? Math.round(
+          costValues.reduce((sum, c) => sum + c, 0) / costValues.length
+        )
+      : null;
+  const minCost = costValues.length > 0 ? Math.min(...costValues) : null;
+  const maxCost = costValues.length > 0 ? Math.max(...costValues) : null;
 
   return (
     <div className="mc-panel p-5 flex flex-col gap-4">
@@ -45,6 +47,25 @@ export default function OptionCard({
           </span>
         )}
       </div>
+
+      {avgCost !== null && (
+        <div className="bg-[#d4a017] border-2 border-black px-3 py-2.5 flex items-center gap-2">
+          <ChestIcon className="h-5 w-5 shrink-0" />
+          <div>
+            <p className="text-[9px] mc-heading text-white">Approx Budget</p>
+            <p className="text-sm font-semibold text-white mt-0.5">
+              ₹{avgCost.toLocaleString("en-IN")} / person
+              {minCost !== null && maxCost !== null && minCost !== maxCost && (
+                <span className="font-normal">
+                  {" "}
+                  (₹{minCost.toLocaleString("en-IN")}–₹
+                  {maxCost.toLocaleString("en-IN")})
+                </span>
+              )}
+            </p>
+          </div>
+        </div>
+      )}
 
       {costs.length > 0 && (
         <div className="mc-slot p-3">
@@ -118,23 +139,6 @@ export default function OptionCard({
           Word of Caution
         </p>
         <p className="text-sm text-[#4a4a4a]">{option.tradeoffs}</p>
-      </div>
-
-      <div className="flex items-center justify-between pt-3 border-t-2 border-dashed border-black/20">
-        <span className="flex items-center gap-1.5 text-sm text-[#202020]">
-          <HeartIcon className="h-4 w-4" filled />
-          {voteCount} vote{voteCount === 1 ? "" : "s"}
-        </span>
-        {!isLocked && onVote && (
-          <button
-            onClick={onVote}
-            className={`mc-btn text-[9px] px-4 py-2.5 ${
-              currentUserVoted ? "" : "mc-btn-stone"
-            }`}
-          >
-            {currentUserVoted ? "Your Vote!" : "Vote"}
-          </button>
-        )}
       </div>
     </div>
   );

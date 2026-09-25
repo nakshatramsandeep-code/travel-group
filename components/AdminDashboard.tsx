@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Submission, Trip, TripOption, Vote } from "@/lib/types";
+import { Submission, Trip, TripOption } from "@/lib/types";
 import StatusList from "./StatusList";
 import OptionCard from "./OptionCard";
 import XpBar from "./XpBar";
@@ -13,7 +13,6 @@ interface AdminData {
   trip: Trip;
   submissions: Submission[];
   options: TripOption[];
-  votes: Pick<Vote, "member_name" | "option_id">[];
 }
 
 const POLL_INTERVAL_MS = 8000;
@@ -29,7 +28,6 @@ export default function AdminDashboard({
     trip: initialTrip,
     submissions: [],
     options: [],
-    votes: [],
   });
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [origin] = useState(() =>
@@ -56,9 +54,8 @@ export default function AdminDashboard({
     load();
   }, [load]);
 
-  // Poll for changes (new submissions/votes from the group) while the
-  // decision isn't locked yet, so the dashboard stays live without a manual
-  // refresh.
+  // Poll for changes (new submissions from the group) while the decision
+  // isn't locked yet, so the dashboard stays live without a manual refresh.
   const dataRef = useRef(data);
   useEffect(() => {
     dataRef.current = data;
@@ -72,7 +69,7 @@ export default function AdminDashboard({
     return () => clearInterval(interval);
   }, [load]);
 
-  const { trip, submissions, options, votes } = data;
+  const { trip, submissions, options } = data;
   const submittedMembers = submissions.map((s) => s.member_name);
   const allSubmitted = submittedMembers.length >= trip.group_size;
   const deadlineStatus = describeDeadline(trip.deadline);
@@ -152,12 +149,6 @@ export default function AdminDashboard({
     }
   }
 
-  const voteCount = option
-    ? votes.filter((v) => v.option_id === option.id).length
-    : 0;
-  const votedMembers = new Set(votes.map((v) => v.member_name));
-  const notYetVoted = trip.member_names.filter((n) => !votedMembers.has(n));
-
   return (
     <div className="flex flex-col gap-6">
       <AchievementToast
@@ -234,8 +225,8 @@ export default function AdminDashboard({
             {confirmingRegenerate ? (
               <div className="flex flex-col gap-2 bg-[#d4a017] border-2 border-black p-3">
                 <p className="text-sm text-white font-medium">
-                  Re-rolling the Oracle will replace the current destination
-                  and clear any votes already cast. Continue?
+                  Re-rolling the Oracle will replace the current
+                  recommendation. Continue?
                 </p>
                 <div className="flex gap-2">
                   <button
@@ -283,20 +274,9 @@ export default function AdminDashboard({
 
       {option && (
         <div className="flex flex-col gap-3">
-          {trip.status !== "locked" && (
-            <p className="text-xs text-[#4a4a4a] text-center">
-              {notYetVoted.length === 0
-                ? "Everyone has voted."
-                : `Waiting on votes from: ${notYetVoted.join(", ")}`}
-            </p>
-          )}
-
           <OptionCard
             option={option}
-            voteCount={voteCount}
             isWinner={trip.locked_option_id === option.id}
-            isLocked={trip.status === "locked"}
-            currentUserVoted={false}
           />
           {trip.status !== "locked" && (
             <button

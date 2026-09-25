@@ -80,11 +80,3 @@ export interface TripOption {
   itinerary: ItineraryDay[];
   generated_at: string;
 }
-
-export interface Vote {
-  id: string;
-  trip_id: string;
-  member_name: string;
-  option_id: string;
-  voted_at: string;
-}

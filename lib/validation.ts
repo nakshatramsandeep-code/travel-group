@@ -49,12 +49,6 @@ export const submissionSchema = z.object({
   path: ["budgetMin"],
 });
 
-export const voteSchema = z.object({
-  tripId: z.string().uuid(),
-  memberName: z.string().min(1),
-  optionId: z.string().uuid(),
-});
-
 export const lockSchema = z.object({
   optionId: z.string().uuid(),
 });

@@ -3,7 +3,7 @@ import TripCreateForm from "@/components/TripCreateForm";
 const STEPS = [
   { label: "Create", detail: "Name your quest & party" },
   { label: "Recruit", detail: "Everyone shares one link" },
-  { label: "Embark", detail: "Vote and lock the destination" },
+  { label: "Embark", detail: "Seal the recommended destination" },
 ];
 
 export default function Home() {

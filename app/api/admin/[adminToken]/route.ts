@@ -29,15 +29,9 @@ export async function GET(
     .eq("trip_id", trip.id)
     .order("rank", { ascending: true });
 
-  const { data: votes } = await supabase
-    .from("votes")
-    .select("member_name, option_id")
-    .eq("trip_id", trip.id);
-
   return NextResponse.json({
     trip,
     submissions: submissions ?? [],
     options: options ?? [],
-    votes: votes ?? [],
   });
 }
