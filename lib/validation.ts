@@ -65,6 +65,12 @@ export const fitScoreEntrySchema = z.object({
   reason: z.string().min(1),
 });
 
+export const itineraryDaySchema = z.object({
+  day: z.number().int().positive(),
+  title: z.string().min(1),
+  description: z.string().min(1),
+});
+
 export const geminiOptionSchema = z.object({
   destination: z.string().min(1),
   dates: z.object({
@@ -74,6 +80,7 @@ export const geminiOptionSchema = z.object({
   estCostPerPerson: z.record(z.string(), z.number().nonnegative()),
   fitScores: z.record(z.string(), fitScoreEntrySchema),
   tradeoffs: z.string().min(1),
+  itinerary: z.array(itineraryDaySchema).min(1),
 });
 
 export const geminiResponseSchema = z.object({

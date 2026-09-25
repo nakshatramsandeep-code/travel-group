@@ -62,6 +62,12 @@ export interface FitScoreEntry {
   reason: string;
 }
 
+export interface ItineraryDay {
+  day: number;
+  title: string;
+  description: string;
+}
+
 export interface TripOption {
   id: string;
   trip_id: string;
@@ -71,6 +77,8 @@ export interface TripOption {
   est_cost_per_person: Record<string, number>;
   fit_scores: Record<string, FitScoreEntry>;
   tradeoffs: string;
+  itinerary: ItineraryDay[];
+  images: string[];
   generated_at: string;
 }
 

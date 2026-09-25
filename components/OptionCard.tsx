@@ -13,11 +13,6 @@ function scoreDotColor(score: number): string {
   return "bg-red-500";
 }
 
-function averageScore(scores: [string, { score: number }][]): number {
-  if (scores.length === 0) return 0;
-  return scores.reduce((sum, [, s]) => sum + s.score, 0) / scores.length;
-}
-
 export default function OptionCard({
   option,
   rankLabel,
@@ -38,7 +33,8 @@ export default function OptionCard({
   onVote?: () => void;
 }) {
   const scores = Object.entries(option.fit_scores);
-  const avg = averageScore(scores);
+  const images = option.images ?? [];
+  const itinerary = option.itinerary ?? [];
 
   return (
     <div
@@ -67,20 +63,27 @@ export default function OptionCard({
             {formatDateRange(option.dates.start, option.dates.end)}
           </p>
         </div>
-        <div className="flex flex-col items-end gap-1">
-          {isWinner && (
-            <span className="text-xs font-medium bg-neutral-900 text-[#f5f5f2] px-2 py-1 rounded-full whitespace-nowrap">
-              Chosen
-            </span>
-          )}
-          <span
-            className={`text-xs font-semibold ${scoreColor(avg)}`}
-            title="Average fit across the group"
-          >
-            {avg.toFixed(1)}/10 avg
+        {isWinner && (
+          <span className="text-xs font-medium bg-neutral-900 text-[#f5f5f2] px-2 py-1 rounded-full whitespace-nowrap">
+            Chosen
           </span>
-        </div>
+        )}
       </div>
+
+      {images.length > 0 && (
+        <div className="flex gap-2 overflow-x-auto -mx-1 px-1">
+          {images.map((src, i) => (
+            // eslint-disable-next-line @next/next/no-img-element -- external, unconfigured photo hosts (Wikimedia); a plain img avoids next/image domain config
+            <img
+              key={src}
+              src={src}
+              alt={`${option.destination} photo ${i + 1}`}
+              loading="lazy"
+              className="h-24 w-32 shrink-0 rounded-lg object-cover border border-black/10 bg-black/[0.03]"
+            />
+          ))}
+        </div>
+      )}
 
       <div>
         <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">
@@ -94,6 +97,29 @@ export default function OptionCard({
           ))}
         </div>
       </div>
+
+      {itinerary.length > 0 && (
+        <div>
+          <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1.5">
+            Itinerary
+          </p>
+          <ol className="flex flex-col gap-2 text-sm">
+            {itinerary.map((day) => (
+              <li key={day.day} className="flex gap-2.5">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-black/[0.05] text-[11px] font-semibold text-neutral-600">
+                  {day.day}
+                </span>
+                <span>
+                  <span className="font-medium text-neutral-800">
+                    {day.title}
+                  </span>{" "}
+                  <span className="text-neutral-500">{day.description}</span>
+                </span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
 
       <div>
         <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">

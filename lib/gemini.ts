@@ -36,6 +36,20 @@ const RESPONSE_SCHEMA = {
               "Map of member name to { score: 0-10, reason: string }",
           },
           tradeoffs: { type: "string" },
+          itinerary: {
+            type: "array",
+            description:
+              "One entry per day of the trip, in order, covering the full date range",
+            items: {
+              type: "object",
+              properties: {
+                day: { type: "integer" },
+                title: { type: "string" },
+                description: { type: "string" },
+              },
+              required: ["day", "title", "description"],
+            },
+          },
         },
         required: [
           "destination",
@@ -43,6 +57,7 @@ const RESPONSE_SCHEMA = {
           "estCostPerPerson",
           "fitScores",
           "tradeoffs",
+          "itinerary",
         ],
       },
     },
@@ -85,6 +100,7 @@ For each option return:
 - estCostPerPerson: your estimated per-person cost in INR for EACH of these members: ${submissions.map((s) => s.member_name).join(", ")}
 - fitScores: for EACH of these members, a score from 0 to 10 for how well this option fits their stated preferences, and a one-line reason
 - tradeoffs: a short note on what the group is trading off with this option
+- itinerary: a day-by-day plan, one entry per day from the chosen start date to the end date (inclusive), each with a day number, a short title (e.g. "Arrival & beach time"), and a 1-2 sentence description of what the group would do that day
 
 Return strict JSON only, matching the provided schema. Do not include any text outside the JSON.`;
 }

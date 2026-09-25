@@ -41,6 +41,8 @@ create table if not exists options (
   est_cost_per_person   jsonb not null,
   fit_scores            jsonb not null,
   tradeoffs             text not null,
+  itinerary             jsonb not null default '[]',
+  images                jsonb not null default '[]',
   generated_at          timestamptz not null default now()
 );
 

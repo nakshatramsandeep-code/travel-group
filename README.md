@@ -22,7 +22,9 @@ status, generates options, and locks the final decision.
    ```
 
 2. Create a Supabase project, then run [`supabase/schema.sql`](supabase/schema.sql)
-   in the Supabase SQL editor to create the tables.
+   in the Supabase SQL editor to create the tables. If your project already
+   existed before the itinerary/photos feature was added, also run
+   [`supabase/migrations/002_add_itinerary_images.sql`](supabase/migrations/002_add_itinerary_images.sql).
 
 3. Copy `.env.example` to `.env.local` and fill in:
 
@@ -62,12 +64,16 @@ status, generates options, and locks the final decision.
    person's max, and anything hitting a hard no removed. Those filtered
    constraints are handed to Gemini (`lib/gemini.ts`), which returns 2-3
    ranked destinations with a 0-10 fit score and one-line reason per person,
-   plus an estimated per-person cost and trade-offs. The response is
-   requested as strict JSON and validated with `zod` before saving — a bad or
-   failed response surfaces as an error, never a fabricated result.
+   an estimated per-person cost, trade-offs, and a day-by-day itinerary. The
+   response is requested as strict JSON and validated with `zod` before
+   saving — a bad or failed response surfaces as an error, never a
+   fabricated result. A few real photos per destination are then fetched
+   from Wikipedia (`lib/images.ts`, no API key needed) and saved alongside
+   the option.
 5. **Decision board** (`/t/[shareToken]/board`) — shows the options as cards
-   with dates, estimated cost per person, and a color-coded person × option
-   fit-score grid. Anyone with the link can vote once per option set.
+   with photos, dates, a day-by-day itinerary, estimated cost per person,
+   and a color-coded person × option fit-score grid. Anyone with the link
+   can vote once per option set.
 6. **Lock** — Riya confirms a final option from the admin page. The board then
    shows the locked decision and further writes (submissions, votes,
    regeneration) are rejected.
