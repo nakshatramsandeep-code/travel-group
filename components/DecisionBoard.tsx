@@ -1,9 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Trip, TripOption, Vote } from "@/lib/types";
 import OptionCard from "./OptionCard";
 import FitScoreGrid from "./FitScoreGrid";
+import { SkeletonBoard } from "./Skeleton";
+import { getStoredIdentity, setStoredIdentity } from "@/lib/localIdentity";
 
 interface BoardData {
   trip: Pick<
@@ -22,11 +24,27 @@ interface BoardData {
   votes: Pick<Vote, "member_name" | "option_id">[];
 }
 
+const POLL_INTERVAL_MS = 8000;
+
 export default function DecisionBoard({ shareToken }: { shareToken: string }) {
   const [data, setData] = useState<BoardData | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [voterName, setVoterName] = useState("");
+  const [voterName, setVoterNameState] = useState("");
   const [voting, setVoting] = useState(false);
+
+  function setVoterName(name: string) {
+    setVoterNameState(name);
+    if (name) setStoredIdentity(shareToken, name);
+  }
+
+  useEffect(() => {
+    const stored = getStoredIdentity(shareToken);
+    if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- deferred to after hydration to avoid an SSR/client mismatch (localStorage isn't available on the server)
+      setVoterNameState(stored);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount only
+  }, []);
 
   const load = useCallback(async () => {
     try {
@@ -45,6 +63,19 @@ export default function DecisionBoard({ shareToken }: { shareToken: string }) {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- fetch-on-mount; setState only runs after the await inside load()
     load();
+  }, [load]);
+
+  const dataRef = useRef(data);
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (dataRef.current?.trip.status !== "locked") {
+        load();
+      }
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
   }, [load]);
 
   async function castVote(optionId: string) {
@@ -77,7 +108,7 @@ export default function DecisionBoard({ shareToken }: { shareToken: string }) {
   }
 
   if (!data) {
-    return <p className="text-neutral-500 text-center">Loading…</p>;
+    return <SkeletonBoard />;
   }
 
   const { trip, options, votes } = data;
@@ -88,6 +119,8 @@ export default function DecisionBoard({ shareToken }: { shareToken: string }) {
   }, {});
 
   const myVote = votes.find((v) => v.member_name === voterName)?.option_id;
+  const votedMembers = new Set(votes.map((v) => v.member_name));
+  const notYetVoted = trip.member_names.filter((n) => !votedMembers.has(n));
 
   return (
     <div className="flex flex-col gap-6">
@@ -114,7 +147,7 @@ export default function DecisionBoard({ shareToken }: { shareToken: string }) {
           <FitScoreGrid options={options} memberNames={trip.member_names} />
 
           {trip.status !== "locked" && (
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-3">
               <label className="text-sm text-neutral-400">Voting as</label>
               <select
                 value={voterName}
@@ -128,6 +161,11 @@ export default function DecisionBoard({ shareToken }: { shareToken: string }) {
                   </option>
                 ))}
               </select>
+              <span className="text-xs text-neutral-500">
+                {notYetVoted.length === 0
+                  ? "Everyone has voted"
+                  : `Waiting on: ${notYetVoted.join(", ")}`}
+              </span>
             </div>
           )}
 
@@ -143,6 +181,7 @@ export default function DecisionBoard({ shareToken }: { shareToken: string }) {
                 key={opt.id}
                 option={opt}
                 rankLabel={`Option ${opt.rank}`}
+                isTopPick={opt.rank === 1}
                 voteCount={voteCounts[opt.id] ?? 0}
                 isWinner={trip.locked_option_id === opt.id}
                 isLocked={trip.status === "locked"}

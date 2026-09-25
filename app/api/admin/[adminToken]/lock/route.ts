@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { errorResponse } from "@/lib/api-helpers";
+import { errorResponse, zodErrorMessage } from "@/lib/api-helpers";
 import { lockSchema } from "@/lib/validation";
 
 export async function POST(
@@ -11,7 +11,7 @@ export async function POST(
   const body = await req.json().catch(() => null);
   const parsed = lockSchema.safeParse(body);
   if (!parsed.success) {
-    return errorResponse(parsed.error.message, 422);
+    return errorResponse(zodErrorMessage(parsed.error), 422);
   }
 
   const { data: trip, error: tripError } = await supabase

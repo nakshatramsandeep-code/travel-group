@@ -2,6 +2,7 @@ import { GoogleGenAI } from "@google/genai";
 import { FilteredConstraints } from "./rules";
 import { Submission } from "./types";
 import { geminiResponseSchema, GeminiResponse } from "./validation";
+import { zodErrorMessage } from "./api-helpers";
 
 export class GeminiGenerationError extends Error {}
 
@@ -129,7 +130,7 @@ export async function generateTripOptions(
   const validated = geminiResponseSchema.safeParse(parsed);
   if (!validated.success) {
     throw new GeminiGenerationError(
-      `Gemini response did not match the expected schema: ${validated.error.message}`
+      `Gemini response did not match the expected schema: ${zodErrorMessage(validated.error)}`
     );
   }
 

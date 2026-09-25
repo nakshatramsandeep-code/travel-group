@@ -7,6 +7,15 @@ import {
   DateRange,
   DestinationType,
 } from "@/lib/types";
+import { getStoredIdentity, setStoredIdentity } from "@/lib/localIdentity";
+import {
+  WalletIcon,
+  CalendarIcon,
+  CompassIcon,
+  BanIcon,
+  UserIcon,
+  CheckIcon,
+} from "@/components/icons";
 
 interface Props {
   shareToken: string;
@@ -23,7 +32,20 @@ export default function PreferenceForm({
   deadline,
   tripStatus,
 }: Props) {
-  const [memberName, setMemberName] = useState("");
+  const [memberName, setMemberNameState] = useState("");
+  function setMemberName(name: string) {
+    setMemberNameState(name);
+    if (name) setStoredIdentity(shareToken, name);
+  }
+
+  useEffect(() => {
+    const stored = getStoredIdentity(shareToken);
+    if (memberNames.includes(stored)) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- deferred to after hydration to avoid an SSR/client mismatch (localStorage isn't available on the server)
+      setMemberNameState(stored);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount only; re-running on memberNames identity changes would fight the user's own selection
+  }, []);
   const [budgetMin, setBudgetMin] = useState("");
   const [budgetMax, setBudgetMax] = useState("");
   const [dateRanges, setDateRanges] = useState<DateRange[]>([emptyRange()]);
@@ -180,22 +202,38 @@ export default function PreferenceForm({
       )}
 
       <div>
-        <label className="block text-sm font-medium text-neutral-200 mb-1">
+        <label className="flex items-center gap-1.5 text-sm font-medium text-neutral-200 mb-1.5">
+          <UserIcon className="h-4 w-4 text-neutral-500" />
           Which one are you?
         </label>
-        <select
-          value={memberName}
-          onChange={(e) => setMemberName(e.target.value)}
-          disabled={isReadOnly}
-          className="w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2.5 text-neutral-100 focus:border-emerald-500 focus:outline-none disabled:opacity-60"
-        >
-          <option value="">Select your name</option>
-          {memberNames.map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            value={memberName}
+            onChange={(e) => setMemberName(e.target.value)}
+            disabled={isReadOnly}
+            className="w-full appearance-none rounded-xl border border-neutral-700 bg-neutral-900 px-3.5 py-3 pr-9 text-neutral-100 focus:border-emerald-500 focus:outline-none disabled:opacity-60"
+          >
+            <option value="">Select your name</option>
+            {memberNames.map((n) => (
+              <option key={n} value={n}>
+                {n}
+              </option>
+            ))}
+          </select>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500"
+          >
+            <path
+              d="M6 9l6 6 6-6"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
       </div>
 
       {memberName && (
@@ -205,65 +243,86 @@ export default function PreferenceForm({
           )}
 
           {hasExisting && !loadingExisting && (
-            <p className="text-xs text-emerald-400">
+            <p className="flex items-center gap-1.5 text-xs text-emerald-400">
+              <CheckIcon className="h-3.5 w-3.5" />
               You&apos;ve already submitted — editing will update your answers.
             </p>
           )}
 
-          <fieldset disabled={isReadOnly || loadingExisting} className="flex flex-col gap-5">
-            <div>
-              <label className="block text-sm font-medium text-neutral-200 mb-1">
+          <fieldset
+            disabled={isReadOnly || loadingExisting}
+            className="flex flex-col gap-4"
+          >
+            <section className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-200 mb-3">
+                <WalletIcon className="h-4 w-4 text-emerald-500" />
                 Budget per person (INR)
-              </label>
+              </h3>
               <div className="flex gap-3">
-                <input
-                  type="number"
-                  min={0}
-                  placeholder="Min"
-                  value={budgetMin}
-                  onChange={(e) => setBudgetMin(e.target.value)}
-                  className="w-1/2 rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2.5 text-neutral-100 placeholder-neutral-500 focus:border-emerald-500 focus:outline-none"
-                />
-                <input
-                  type="number"
-                  min={0}
-                  placeholder="Max"
-                  value={budgetMax}
-                  onChange={(e) => setBudgetMax(e.target.value)}
-                  className="w-1/2 rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2.5 text-neutral-100 placeholder-neutral-500 focus:border-emerald-500 focus:outline-none"
-                />
+                <div className="relative w-1/2">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">
+                    ₹
+                  </span>
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="Min"
+                    value={budgetMin}
+                    onChange={(e) => setBudgetMin(e.target.value)}
+                    className="w-full rounded-lg border border-neutral-700 bg-neutral-900 pl-7 pr-3 py-2.5 text-neutral-100 placeholder-neutral-500 focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+                <div className="relative w-1/2">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">
+                    ₹
+                  </span>
+                  <input
+                    type="number"
+                    min={0}
+                    placeholder="Max"
+                    value={budgetMax}
+                    onChange={(e) => setBudgetMax(e.target.value)}
+                    className="w-full rounded-lg border border-neutral-700 bg-neutral-900 pl-7 pr-3 py-2.5 text-neutral-100 placeholder-neutral-500 focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
               </div>
-            </div>
+            </section>
 
-            <div>
-              <label className="block text-sm font-medium text-neutral-200 mb-1">
+            <section className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-200 mb-3">
+                <CalendarIcon className="h-4 w-4 text-emerald-500" />
                 When are you available?
-              </label>
+              </h3>
               <div className="flex flex-col gap-2">
                 {dateRanges.map((r, idx) => (
-                  <div key={idx} className="flex items-center gap-2">
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 rounded-lg border border-neutral-800 bg-neutral-900/60 p-2"
+                  >
                     <input
                       type="date"
                       value={r.start}
                       onChange={(e) =>
                         updateRange(idx, "start", e.target.value)
                       }
-                      className="flex-1 rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 focus:border-emerald-500 focus:outline-none"
+                      className="min-w-0 flex-1 rounded-md border border-neutral-700 bg-neutral-900 px-2.5 py-2 text-sm text-neutral-100 focus:border-emerald-500 focus:outline-none"
                     />
-                    <span className="text-neutral-500 text-sm">to</span>
+                    <span className="shrink-0 text-neutral-500 text-xs">
+                      to
+                    </span>
                     <input
                       type="date"
                       value={r.end}
                       onChange={(e) =>
                         updateRange(idx, "end", e.target.value)
                       }
-                      className="flex-1 rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-neutral-100 focus:border-emerald-500 focus:outline-none"
+                      className="min-w-0 flex-1 rounded-md border border-neutral-700 bg-neutral-900 px-2.5 py-2 text-sm text-neutral-100 focus:border-emerald-500 focus:outline-none"
                     />
                     {dateRanges.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeRange(idx)}
-                        className="text-neutral-500 hover:text-red-400 px-1"
+                        className="shrink-0 rounded-md p-1.5 text-neutral-500 hover:bg-red-950/40 hover:text-red-400 transition-colors"
                         aria-label="Remove date range"
                       >
                         ✕
@@ -274,17 +333,21 @@ export default function PreferenceForm({
                 <button
                   type="button"
                   onClick={addRange}
-                  className="self-start text-sm text-emerald-400 hover:text-emerald-300"
+                  className="self-start rounded-lg border border-dashed border-neutral-700 px-3 py-1.5 text-sm text-emerald-400 hover:border-emerald-600 hover:text-emerald-300 transition-colors"
                 >
                   + Add another window
                 </button>
               </div>
-            </div>
+            </section>
 
-            <div>
-              <label className="block text-sm font-medium text-neutral-200 mb-2">
-                What kind of trip? (pick all you&apos;d enjoy)
-              </label>
+            <section className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-200 mb-3">
+                <CompassIcon className="h-4 w-4 text-emerald-500" />
+                What kind of trip?{" "}
+                <span className="font-normal text-neutral-500">
+                  (pick all you&apos;d enjoy)
+                </span>
+              </h3>
               <div className="flex flex-wrap gap-2">
                 {DESTINATION_TYPES.map((d) => {
                   const active = destinationTypes.includes(d.value);
@@ -293,47 +356,64 @@ export default function PreferenceForm({
                       type="button"
                       key={d.value}
                       onClick={() => toggleDestinationType(d.value)}
-                      className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                      className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm border transition-colors ${
                         active
                           ? "bg-emerald-600 border-emerald-500 text-white"
                           : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
                       }`}
                     >
+                      {active && <CheckIcon className="h-3.5 w-3.5" />}
                       {d.label}
                     </button>
                   );
                 })}
               </div>
-            </div>
+            </section>
 
-            <div>
-              <label className="block text-sm font-medium text-neutral-200 mb-2">
+            <section className="rounded-xl border border-neutral-800 bg-neutral-950/40 p-4">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-200 mb-3">
+                <BanIcon className="h-4 w-4 text-rose-500" />
                 Hard no&apos;s
-              </label>
-              <div className="flex flex-col gap-2">
-                {HARD_NO_OPTIONS.map((opt) => (
-                  <label
-                    key={opt}
-                    className="flex items-center gap-2 text-sm text-neutral-300"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={hardNos.includes(opt)}
-                      onChange={() => toggleHardNo(opt)}
-                      className="rounded border-neutral-600 bg-neutral-900 text-emerald-600 focus:ring-emerald-500"
-                    />
-                    {opt}
-                  </label>
-                ))}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                {HARD_NO_OPTIONS.map((opt) => {
+                  const active = hardNos.includes(opt);
+                  return (
+                    <button
+                      type="button"
+                      key={opt}
+                      onClick={() => toggleHardNo(opt)}
+                      aria-pressed={active}
+                      className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
+                        active
+                          ? "bg-rose-950/50 border-rose-800 text-rose-200"
+                          : "border-neutral-700 text-neutral-300 hover:border-neutral-500"
+                      }`}
+                    >
+                      <span
+                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
+                          active
+                            ? "bg-rose-600 border-rose-500"
+                            : "border-neutral-600"
+                        }`}
+                      >
+                        {active && (
+                          <CheckIcon className="h-3 w-3 text-white" />
+                        )}
+                      </span>
+                      {opt}
+                    </button>
+                  );
+                })}
               </div>
               <textarea
                 value={hardNoNotes}
                 onChange={(e) => setHardNoNotes(e.target.value)}
                 placeholder="Anything else you definitely don't want..."
                 rows={2}
-                className="mt-2 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-neutral-100 placeholder-neutral-500 focus:border-emerald-500 focus:outline-none"
+                className="mt-3 w-full rounded-lg border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-neutral-100 placeholder-neutral-500 focus:border-emerald-500 focus:outline-none"
               />
-            </div>
+            </section>
 
             {error && (
               <p className="text-sm text-red-400 bg-red-950/40 border border-red-900 rounded-lg px-3 py-2">
@@ -349,7 +429,7 @@ export default function PreferenceForm({
             <button
               type="submit"
               disabled={saving}
-              className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-2.5 transition-colors"
+              className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-medium py-3 transition-colors"
             >
               {saving ? "Saving..." : hasExisting ? "Update my answers" : "Submit"}
             </button>

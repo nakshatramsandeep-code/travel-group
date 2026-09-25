@@ -1,10 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Submission, Trip, TripOption, Vote } from "@/lib/types";
 import StatusList from "./StatusList";
 import OptionCard from "./OptionCard";
 import FitScoreGrid from "./FitScoreGrid";
+import { SkeletonBlock } from "./Skeleton";
+import { describeDeadline, formatDateTime } from "@/lib/date";
 
 interface AdminData {
   trip: Trip;
@@ -12,6 +14,8 @@ interface AdminData {
   options: TripOption[];
   votes: Pick<Vote, "member_name" | "option_id">[];
 }
+
+const POLL_INTERVAL_MS = 8000;
 
 export default function AdminDashboard({
   adminToken,
@@ -26,6 +30,7 @@ export default function AdminDashboard({
     options: [],
     votes: [],
   });
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [origin] = useState(() =>
     typeof window !== "undefined" ? window.location.origin : ""
   );
@@ -33,6 +38,7 @@ export default function AdminDashboard({
   const [locking, setLocking] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
   const [copied, setCopied] = useState<"share" | "admin" | null>(null);
+  const [confirmingRegenerate, setConfirmingRegenerate] = useState(false);
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/admin/${adminToken}`);
@@ -40,6 +46,7 @@ export default function AdminDashboard({
       const json = await res.json();
       setData(json);
     }
+    setHasLoadedOnce(true);
   }, [adminToken]);
 
   useEffect(() => {
@@ -47,11 +54,34 @@ export default function AdminDashboard({
     load();
   }, [load]);
 
+  // Poll for changes (new submissions/votes from the group) while the
+  // decision isn't locked yet, so the dashboard stays live without a manual
+  // refresh.
+  const dataRef = useRef(data);
+  useEffect(() => {
+    dataRef.current = data;
+  }, [data]);
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (dataRef.current?.trip.status !== "locked") {
+        load();
+      }
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [load]);
+
   const { trip, submissions, options, votes } = data;
   const submittedMembers = submissions.map((s) => s.member_name);
   const allSubmitted = submittedMembers.length >= trip.group_size;
-  const deadlinePassed = new Date() > new Date(trip.deadline);
+  const deadlineStatus = describeDeadline(trip.deadline);
+  const deadlinePassed = deadlineStatus.urgency === "passed";
   const canGenerate = (allSubmitted || deadlinePassed) && trip.status !== "locked";
+  const badgeClass =
+    deadlineStatus.urgency === "passed"
+      ? "bg-neutral-800 text-neutral-400 border-neutral-700"
+      : deadlineStatus.urgency === "soon"
+        ? "bg-amber-950/50 text-amber-300 border-amber-900"
+        : "bg-emerald-950/50 text-emerald-400 border-emerald-900";
 
   const shareUrl = origin ? `${origin}/t/${trip.share_token}` : "";
   const adminUrl = origin ? `${origin}/admin/${adminToken}` : "";
@@ -67,6 +97,7 @@ export default function AdminDashboard({
   }
 
   async function handleGenerate() {
+    setConfirmingRegenerate(false);
     setGenerating(true);
     setGenError(null);
     try {
@@ -85,6 +116,14 @@ export default function AdminDashboard({
     } finally {
       setGenerating(false);
     }
+  }
+
+  function handleGenerateClick() {
+    if (options.length > 0 && !confirmingRegenerate) {
+      setConfirmingRegenerate(true);
+      return;
+    }
+    handleGenerate();
   }
 
   async function handleLock(optionId: string) {
@@ -112,14 +151,23 @@ export default function AdminDashboard({
     acc[opt.id] = votes.filter((v) => v.option_id === opt.id).length;
     return acc;
   }, {});
+  const votedMembers = new Set(votes.map((v) => v.member_name));
+  const notYetVoted = trip.member_names.filter((n) => !votedMembers.has(n));
 
   return (
     <div className="flex flex-col gap-6">
       <div className="text-center">
         <h1 className="text-2xl font-semibold text-white">{trip.name}</h1>
-        <p className="mt-1 text-sm text-neutral-400">
-          Deadline: {new Date(trip.deadline).toLocaleString("en-IN")}
-        </p>
+        <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+          <span
+            className={`text-xs font-medium px-2.5 py-1 rounded-full border ${badgeClass}`}
+          >
+            {deadlineStatus.text}
+          </span>
+          <span className="text-xs text-neutral-500">
+            {formatDateTime(trip.deadline)}
+          </span>
+        </div>
       </div>
 
       <div className="bg-neutral-900/60 border border-neutral-800 rounded-2xl p-5 flex flex-col gap-3">
@@ -158,26 +206,71 @@ export default function AdminDashboard({
       </div>
 
       <div className="bg-neutral-900/60 border border-neutral-800 rounded-2xl p-5 flex flex-col gap-4">
-        <p className="text-sm font-medium text-neutral-200">Submission status</p>
-        <StatusList
-          memberNames={trip.member_names}
-          submittedMembers={submittedMembers}
-        />
+        <div className="flex items-center justify-between">
+          <p className="text-sm font-medium text-neutral-200">
+            Submission status
+          </p>
+          {hasLoadedOnce && (
+            <span className="text-xs text-neutral-500">
+              {submittedMembers.length}/{trip.group_size} submitted
+            </span>
+          )}
+        </div>
 
-        {trip.status !== "locked" && (
-          <button
-            onClick={handleGenerate}
-            disabled={!canGenerate || generating}
-            className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 transition-colors"
-          >
-            {generating
-              ? "Generating…"
-              : options.length > 0
-                ? "Regenerate options"
-                : "Generate options"}
-          </button>
+        {!hasLoadedOnce ? (
+          <div className="flex flex-col gap-2">
+            {trip.member_names.map((n) => (
+              <SkeletonBlock key={n} className="h-9 w-full" />
+            ))}
+          </div>
+        ) : (
+          <StatusList
+            memberNames={trip.member_names}
+            submittedMembers={submittedMembers}
+          />
         )}
-        {!canGenerate && trip.status !== "locked" && (
+
+        {hasLoadedOnce && trip.status !== "locked" && (
+          <>
+            {confirmingRegenerate ? (
+              <div className="flex flex-col gap-2 rounded-lg border border-amber-900 bg-amber-950/30 p-3">
+                <p className="text-sm text-amber-300">
+                  Regenerating will replace the current options and clear any
+                  votes already cast. Continue?
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleGenerate}
+                    disabled={generating}
+                    className="flex-1 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-sm font-medium py-2 transition-colors"
+                  >
+                    {generating ? "Regenerating…" : "Yes, regenerate"}
+                  </button>
+                  <button
+                    onClick={() => setConfirmingRegenerate(false)}
+                    disabled={generating}
+                    className="flex-1 rounded-lg border border-neutral-700 text-neutral-300 hover:border-neutral-500 text-sm font-medium py-2 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                onClick={handleGenerateClick}
+                disabled={!canGenerate || generating}
+                className="w-full rounded-lg bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-2.5 transition-colors"
+              >
+                {generating
+                  ? "Generating…"
+                  : options.length > 0
+                    ? "Regenerate options"
+                    : "Generate options"}
+              </button>
+            )}
+          </>
+        )}
+        {hasLoadedOnce && !canGenerate && trip.status !== "locked" && (
           <p className="text-xs text-neutral-500 text-center">
             Enabled once everyone has submitted or the deadline passes.
           </p>
@@ -192,12 +285,22 @@ export default function AdminDashboard({
       {options.length > 0 && (
         <div className="flex flex-col gap-5">
           <FitScoreGrid options={options} memberNames={trip.member_names} />
+
+          {trip.status !== "locked" && (
+            <p className="text-xs text-neutral-500 -mt-2">
+              {notYetVoted.length === 0
+                ? "Everyone has voted."
+                : `Waiting on votes from: ${notYetVoted.join(", ")}`}
+            </p>
+          )}
+
           <div className="grid gap-5 sm:grid-cols-2">
             {options.map((opt) => (
               <div key={opt.id} className="flex flex-col gap-2">
                 <OptionCard
                   option={opt}
                   rankLabel={`Option ${opt.rank}`}
+                  isTopPick={opt.rank === 1}
                   voteCount={voteCounts[opt.id] ?? 0}
                   isWinner={trip.locked_option_id === opt.id}
                   isLocked={trip.status === "locked"}

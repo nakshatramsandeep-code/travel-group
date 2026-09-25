@@ -17,11 +17,23 @@ export const destinationTypeSchema = z.enum([
   "adventure",
 ]);
 
-export const createTripSchema = z.object({
-  name: z.string().min(1).max(120),
-  memberNames: z.array(z.string().min(1).max(60)).min(2).max(20),
-  deadline: z.string().min(1),
-});
+export const createTripSchema = z
+  .object({
+    name: z.string().min(1).max(120),
+    memberNames: z.array(z.string().min(1).max(60)).min(2).max(20),
+    deadline: z.string().min(1),
+  })
+  .refine(
+    (t) => {
+      const lower = t.memberNames.map((n) => n.toLowerCase());
+      return new Set(lower).size === lower.length;
+    },
+    { message: "Member names must be distinct", path: ["memberNames"] }
+  )
+  .refine((t) => new Date(t.deadline) > new Date(), {
+    message: "Deadline must be in the future",
+    path: ["deadline"],
+  });
 
 export const submissionSchema = z.object({
   tripId: z.string().uuid(),

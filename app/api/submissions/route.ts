@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { errorResponse, isPastDeadline } from "@/lib/api-helpers";
+import { errorResponse, isPastDeadline, zodErrorMessage } from "@/lib/api-helpers";
 import { z } from "zod";
 
 const bodySchema = z.object({
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   const parsed = bodySchema.safeParse(body);
   if (!parsed.success) {
-    return errorResponse(parsed.error.message, 422);
+    return errorResponse(zodErrorMessage(parsed.error), 422);
   }
   if (parsed.data.budgetMin > parsed.data.budgetMax) {
     return errorResponse("budgetMin must be <= budgetMax", 422);

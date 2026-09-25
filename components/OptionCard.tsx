@@ -1,4 +1,5 @@
 import { TripOption } from "@/lib/types";
+import { formatDateRange } from "@/lib/date";
 
 function scoreColor(score: number): string {
   if (score >= 8) return "text-emerald-400";
@@ -6,9 +7,21 @@ function scoreColor(score: number): string {
   return "text-red-400";
 }
 
+function scoreDotColor(score: number): string {
+  if (score >= 8) return "bg-emerald-500";
+  if (score >= 5) return "bg-amber-500";
+  return "bg-red-500";
+}
+
+function averageScore(scores: [string, { score: number }][]): number {
+  if (scores.length === 0) return 0;
+  return scores.reduce((sum, [, s]) => sum + s.score, 0) / scores.length;
+}
+
 export default function OptionCard({
   option,
   rankLabel,
+  isTopPick,
   voteCount,
   isWinner,
   isLocked,
@@ -17,6 +30,7 @@ export default function OptionCard({
 }: {
   option: TripOption;
   rankLabel: string;
+  isTopPick?: boolean;
   voteCount: number;
   isWinner: boolean;
   isLocked: boolean;
@@ -24,6 +38,7 @@ export default function OptionCard({
   onVote?: () => void;
 }) {
   const scores = Object.entries(option.fit_scores);
+  const avg = averageScore(scores);
 
   return (
     <div
@@ -35,21 +50,36 @@ export default function OptionCard({
     >
       <div className="flex items-start justify-between gap-2">
         <div>
-          <span className="text-xs uppercase tracking-wide text-neutral-500">
-            {rankLabel}
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-xs uppercase tracking-wide text-neutral-500">
+              {rankLabel}
+            </span>
+            {isTopPick && !isWinner && (
+              <span className="text-[11px] font-medium bg-amber-500/15 text-amber-300 border border-amber-800 px-1.5 py-0.5 rounded-full">
+                Top pick
+              </span>
+            )}
+          </div>
           <h3 className="text-lg font-semibold text-white">
             {option.destination}
           </h3>
           <p className="text-sm text-neutral-400">
-            {option.dates.start} → {option.dates.end}
+            {formatDateRange(option.dates.start, option.dates.end)}
           </p>
         </div>
-        {isWinner && (
-          <span className="text-xs font-medium bg-emerald-600 text-white px-2 py-1 rounded-full whitespace-nowrap">
-            Chosen
+        <div className="flex flex-col items-end gap-1">
+          {isWinner && (
+            <span className="text-xs font-medium bg-emerald-600 text-white px-2 py-1 rounded-full whitespace-nowrap">
+              Chosen
+            </span>
+          )}
+          <span
+            className={`text-xs font-semibold ${scoreColor(avg)}`}
+            title="Average fit across the group"
+          >
+            {avg.toFixed(1)}/10 avg
           </span>
-        )}
+        </div>
       </div>
 
       <div>
@@ -69,14 +99,20 @@ export default function OptionCard({
         <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">
           Fit
         </p>
-        <ul className="flex flex-col gap-1 text-sm">
+        <ul className="flex flex-col gap-1.5 text-sm">
           {scores.map(([name, entry]) => (
-            <li key={name} className="text-neutral-300">
-              <span className={`font-semibold ${scoreColor(entry.score)}`}>
-                {entry.score}/10
-              </span>{" "}
-              <span className="text-neutral-400">{name}</span> —{" "}
-              <span className="text-neutral-500">{entry.reason}</span>
+            <li key={name} className="flex items-start gap-2 text-neutral-300">
+              <span
+                className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${scoreDotColor(entry.score)}`}
+                aria-hidden
+              />
+              <span>
+                <span className={`font-semibold ${scoreColor(entry.score)}`}>
+                  {entry.score}/10
+                </span>{" "}
+                <span className="text-neutral-400">{name}</span> —{" "}
+                <span className="text-neutral-500">{entry.reason}</span>
+              </span>
             </li>
           ))}
         </ul>
