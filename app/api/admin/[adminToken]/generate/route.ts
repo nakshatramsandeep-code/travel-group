@@ -3,7 +3,6 @@ import { supabase } from "@/lib/supabase";
 import { errorResponse, isPastDeadline } from "@/lib/api-helpers";
 import { buildFilteredConstraints } from "@/lib/rules";
 import { generateTripOptions, GeminiGenerationError } from "@/lib/gemini";
-import { getDestinationImages } from "@/lib/images";
 import { Submission } from "@/lib/types";
 
 export async function POST(
@@ -67,10 +66,6 @@ export async function POST(
   // Clear previously generated options (and their votes, via cascade) before saving fresh ones.
   await supabase.from("options").delete().eq("trip_id", trip.id);
 
-  const imagesByDestination = await Promise.all(
-    generated.options.map((opt) => getDestinationImages(opt.destination))
-  );
-
   const rows = generated.options.map((opt, idx) => ({
     trip_id: trip.id,
     rank: idx + 1,
@@ -80,7 +75,6 @@ export async function POST(
     fit_scores: opt.fitScores,
     tradeoffs: opt.tradeoffs,
     itinerary: opt.itinerary,
-    images: imagesByDestination[idx],
   }));
 
   const { data: savedOptions, error: insertError } = await supabase

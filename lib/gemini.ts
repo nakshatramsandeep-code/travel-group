@@ -12,7 +12,7 @@ const RESPONSE_SCHEMA = {
     options: {
       type: "array",
       minItems: 1,
-      maxItems: 3,
+      maxItems: 1,
       items: {
         type: "object",
         properties: {
@@ -92,9 +92,9 @@ Pre-filtered constraints (already computed with plain code, do not contradict th
 - Destination types acceptable to everyone: ${constraints.allowedDestinationTypes.join(", ") || "none in common, use best judgement across individual preferences"}
 - Things that are excluded for the whole group (someone's hard no): ${constraints.excludedHardNos.join(", ") || "none"}
 
-Task: suggest the top 2-3 specific destinations (real places, e.g. "Goa", "Munnar", "Rishikesh") that fit within the date windows and budget ceiling above, and respect every hard no. Do not suggest anything on the excluded list.
+Task: pick exactly ONE specific real destination (e.g. "Goa", "Munnar", "Rishikesh") — the single best fit for the whole group — that fits within the date windows and budget ceiling above, and respects every hard no. Do not suggest anything on the excluded list. Return only one option, not several.
 
-For each option return:
+For that option return:
 - destination: the place name
 - dates: a specific start/end date within one of the common windows
 - estCostPerPerson: your estimated per-person cost in INR for EACH of these members: ${submissions.map((s) => s.member_name).join(", ")}

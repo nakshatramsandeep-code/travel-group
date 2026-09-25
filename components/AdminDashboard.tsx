@@ -4,7 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Submission, Trip, TripOption, Vote } from "@/lib/types";
 import StatusList from "./StatusList";
 import OptionCard from "./OptionCard";
-import FitScoreGrid from "./FitScoreGrid";
+import XpBar from "./XpBar";
+import AchievementToast from "./AchievementToast";
 import { SkeletonBlock } from "./Skeleton";
 import { describeDeadline, formatDateTime } from "@/lib/date";
 
@@ -39,6 +40,7 @@ export default function AdminDashboard({
   const [genError, setGenError] = useState<string | null>(null);
   const [copied, setCopied] = useState<"share" | "admin" | null>(null);
   const [confirmingRegenerate, setConfirmingRegenerate] = useState(false);
+  const [achievement, setAchievement] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     const res = await fetch(`/api/admin/${adminToken}`);
@@ -78,13 +80,14 @@ export default function AdminDashboard({
   const canGenerate = (allSubmitted || deadlinePassed) && trip.status !== "locked";
   const badgeClass =
     deadlineStatus.urgency === "passed"
-      ? "bg-black/[0.04] text-neutral-500 border-black/10"
+      ? "bg-[#8b8b8b] text-white"
       : deadlineStatus.urgency === "soon"
-        ? "bg-amber-50 text-amber-800 border-amber-200"
-        : "bg-emerald-50 text-emerald-700 border-emerald-200";
+        ? "bg-[#d4a017] text-white"
+        : "bg-[#6cad3f] text-white";
 
   const shareUrl = origin ? `${origin}/t/${trip.share_token}` : "";
   const adminUrl = origin ? `${origin}/admin/${adminToken}` : "";
+  const option = options[0] as TripOption | undefined;
 
   async function copy(text: string, which: "share" | "admin") {
     try {
@@ -106,11 +109,12 @@ export default function AdminDashboard({
       });
       const json = await res.json();
       if (!res.ok) {
-        setGenError(json.error ?? "Failed to generate options");
+        setGenError(json.error ?? "Failed to consult the Oracle");
         setGenerating(false);
         return;
       }
       await load();
+      setAchievement("The Oracle has revealed your destination!");
     } catch {
       setGenError("Could not reach the server.");
     } finally {
@@ -137,85 +141,80 @@ export default function AdminDashboard({
       });
       const json = await res.json();
       if (!res.ok) {
-        setGenError(json.error ?? "Failed to lock decision");
+        setGenError(json.error ?? "Failed to seal the quest");
         setLocking(false);
         return;
       }
       await load();
+      setAchievement("Quest Sealed! The destination is locked in.");
     } finally {
       setLocking(false);
     }
   }
 
-  const voteCounts = options.reduce<Record<string, number>>((acc, opt) => {
-    acc[opt.id] = votes.filter((v) => v.option_id === opt.id).length;
-    return acc;
-  }, {});
+  const voteCount = option
+    ? votes.filter((v) => v.option_id === option.id).length
+    : 0;
   const votedMembers = new Set(votes.map((v) => v.member_name));
   const notYetVoted = trip.member_names.filter((n) => !votedMembers.has(n));
 
   return (
     <div className="flex flex-col gap-6">
+      <AchievementToast
+        message={achievement ?? ""}
+        show={achievement !== null}
+        onDone={() => setAchievement(null)}
+      />
+
       <div className="text-center">
-        <h1 className="font-serif text-2xl text-neutral-900">{trip.name}</h1>
-        <div className="mt-2 flex flex-wrap items-center justify-center gap-2">
+        <h1 className="mc-heading text-base sm:text-lg text-[#202020]">
+          {trip.name}
+        </h1>
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
           <span
-            className={`text-xs font-medium px-2.5 py-1 rounded-full border ${badgeClass}`}
+            className={`text-[10px] mc-heading px-2.5 py-1.5 border-2 border-black ${badgeClass}`}
           >
             {deadlineStatus.text}
           </span>
-          <span className="text-xs text-neutral-500">
+          <span className="text-xs text-[#3f3f3f]">
             {formatDateTime(trip.deadline)}
           </span>
         </div>
       </div>
 
-      <div className="bg-white border border-black/10 rounded-2xl p-5 flex flex-col gap-3 shadow-sm">
-        <p className="text-xs uppercase tracking-wide text-neutral-500">
-          Share this link with the group
+      <div className="mc-panel p-5 flex flex-col gap-3">
+        <p className="text-[9px] mc-heading text-[#4a4a4a]">
+          Share This Scroll With Your Party
         </p>
         <div className="flex gap-2">
           <input
             readOnly
             value={shareUrl}
-            className="flex-1 min-w-0 rounded-lg border border-black/10 bg-black/[0.03] px-3 py-2 text-sm text-neutral-600"
+            className="mc-input flex-1 min-w-0 px-3 py-2 text-sm"
           />
-          <button
-            onClick={() => copy(shareUrl, "share")}
-            className="shrink-0 rounded-lg border border-black/15 px-3 py-2 text-sm text-neutral-700 hover:border-emerald-600"
-          >
-            {copied === "share" ? "Copied" : "Copy"}
+          <button onClick={() => copy(shareUrl, "share")} className="mc-btn mc-btn-stone shrink-0 px-3 py-2 text-[9px]">
+            {copied === "share" ? "Copied!" : "Copy"}
           </button>
         </div>
-        <p className="text-xs uppercase tracking-wide text-neutral-500 mt-2">
-          Your private admin link — don&apos;t share this
+        <p className="text-[9px] mc-heading text-[#4a4a4a] mt-2">
+          Your Private Admin Scroll — Keep Secret
         </p>
         <div className="flex gap-2">
           <input
             readOnly
             value={adminUrl}
-            className="flex-1 min-w-0 rounded-lg border border-black/10 bg-black/[0.03] px-3 py-2 text-sm text-neutral-600"
+            className="mc-input flex-1 min-w-0 px-3 py-2 text-sm"
           />
-          <button
-            onClick={() => copy(adminUrl, "admin")}
-            className="shrink-0 rounded-lg border border-black/15 px-3 py-2 text-sm text-neutral-700 hover:border-emerald-600"
-          >
-            {copied === "admin" ? "Copied" : "Copy"}
+          <button onClick={() => copy(adminUrl, "admin")} className="mc-btn mc-btn-stone shrink-0 px-3 py-2 text-[9px]">
+            {copied === "admin" ? "Copied!" : "Copy"}
           </button>
         </div>
       </div>
 
-      <div className="bg-white border border-black/10 rounded-2xl p-5 flex flex-col gap-4 shadow-sm">
-        <div className="flex items-center justify-between">
-          <p className="text-sm font-medium text-neutral-800">
-            Submission status
-          </p>
-          {hasLoadedOnce && (
-            <span className="text-xs text-neutral-500">
-              {submittedMembers.length}/{trip.group_size} submitted
-            </span>
-          )}
-        </div>
+      <div className="mc-panel p-5 flex flex-col gap-4">
+        {hasLoadedOnce && (
+          <XpBar current={submittedMembers.length} total={trip.group_size} />
+        )}
 
         {!hasLoadedOnce ? (
           <div className="flex flex-col gap-2">
@@ -233,23 +232,23 @@ export default function AdminDashboard({
         {hasLoadedOnce && trip.status !== "locked" && (
           <>
             {confirmingRegenerate ? (
-              <div className="flex flex-col gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
-                <p className="text-sm text-amber-800">
-                  Regenerating will replace the current options and clear any
-                  votes already cast. Continue?
+              <div className="flex flex-col gap-2 bg-[#d4a017] border-2 border-black p-3">
+                <p className="text-sm text-white font-medium">
+                  Re-rolling the Oracle will replace the current destination
+                  and clear any votes already cast. Continue?
                 </p>
                 <div className="flex gap-2">
                   <button
                     onClick={handleGenerate}
                     disabled={generating}
-                    className="flex-1 rounded-lg bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white text-sm font-medium py-2 transition-colors"
+                    className="mc-btn flex-1 py-2 text-[9px]"
                   >
-                    {generating ? "Regenerating…" : "Yes, regenerate"}
+                    {generating ? "Rolling…" : "Yes, Re-roll"}
                   </button>
                   <button
                     onClick={() => setConfirmingRegenerate(false)}
                     disabled={generating}
-                    className="flex-1 rounded-lg border border-black/15 text-neutral-700 hover:border-black/30 text-sm font-medium py-2 transition-colors"
+                    className="mc-btn mc-btn-stone flex-1 py-2 text-[9px]"
                   >
                     Cancel
                   </button>
@@ -259,65 +258,55 @@ export default function AdminDashboard({
               <button
                 onClick={handleGenerateClick}
                 disabled={!canGenerate || generating}
-                className="w-full rounded-lg bg-neutral-900 hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed text-[#f5f5f2] font-medium py-2.5 transition-colors"
+                className="mc-btn w-full py-3 text-[10px]"
               >
                 {generating
-                  ? "Generating…"
+                  ? "Consulting the Oracle…"
                   : options.length > 0
-                    ? "Regenerate options"
-                    : "Generate options"}
+                    ? "Re-roll the Oracle"
+                    : "Consult the Oracle"}
               </button>
             )}
           </>
         )}
         {hasLoadedOnce && !canGenerate && trip.status !== "locked" && (
-          <p className="text-xs text-neutral-500 text-center">
+          <p className="text-xs text-[#4a4a4a] text-center">
             Enabled once everyone has submitted or the deadline passes.
           </p>
         )}
         {genError && (
-          <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+          <p className="text-sm text-white bg-[#b33a3a] border-2 border-black px-3 py-2">
             {genError}
           </p>
         )}
       </div>
 
-      {options.length > 0 && (
-        <div className="flex flex-col gap-5">
-          <FitScoreGrid options={options} memberNames={trip.member_names} />
-
+      {option && (
+        <div className="flex flex-col gap-3">
           {trip.status !== "locked" && (
-            <p className="text-xs text-neutral-500 -mt-2">
+            <p className="text-xs text-[#4a4a4a] text-center">
               {notYetVoted.length === 0
                 ? "Everyone has voted."
                 : `Waiting on votes from: ${notYetVoted.join(", ")}`}
             </p>
           )}
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            {options.map((opt) => (
-              <div key={opt.id} className="flex flex-col gap-2">
-                <OptionCard
-                  option={opt}
-                  rankLabel={`Option ${opt.rank}`}
-                  isTopPick={opt.rank === 1}
-                  voteCount={voteCounts[opt.id] ?? 0}
-                  isWinner={trip.locked_option_id === opt.id}
-                  isLocked={trip.status === "locked"}
-                  currentUserVoted={false}
-                />
-                {trip.status !== "locked" && (
-                  <button
-                    onClick={() => handleLock(opt.id)}
-                    disabled={locking}
-                    className="rounded-lg border border-emerald-600 text-emerald-700 hover:bg-emerald-50 disabled:opacity-50 text-sm font-medium py-2 transition-colors"
-                  >
-                    Confirm as final choice
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
+          <OptionCard
+            option={option}
+            voteCount={voteCount}
+            isWinner={trip.locked_option_id === option.id}
+            isLocked={trip.status === "locked"}
+            currentUserVoted={false}
+          />
+          {trip.status !== "locked" && (
+            <button
+              onClick={() => handleLock(option.id)}
+              disabled={locking}
+              className="mc-btn mc-btn-gold w-full py-3 text-[10px]"
+            >
+              {locking ? "Sealing…" : "Seal the Quest!"}
+            </button>
+          )}
         </div>
       )}
     </div>

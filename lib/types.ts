@@ -78,7 +78,6 @@ export interface TripOption {
   fit_scores: Record<string, FitScoreEntry>;
   tradeoffs: string;
   itinerary: ItineraryDay[];
-  images: string[];
   generated_at: string;
 }
 

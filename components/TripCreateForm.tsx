@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CompassIcon, UserIcon, CalendarIcon } from "@/components/icons";
+import { CompassIcon, PlayerHeadIcon, ClockIcon } from "@/components/icons";
 
 export default function TripCreateForm() {
   const router = useRouter();
@@ -72,10 +72,10 @@ export default function TripCreateForm() {
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-      <section className="rounded-xl border border-black/10 bg-black/[0.03] p-4">
-        <label className="flex items-center gap-1.5 text-sm font-semibold text-neutral-800 mb-2">
-          <CompassIcon className="h-4 w-4 text-emerald-600" />
-          Trip name
+      <section className="mc-slot p-4">
+        <label className="flex items-center gap-2 mc-heading text-[9px] text-[#202020] mb-3">
+          <CompassIcon className="h-5 w-5" />
+          Quest Name
         </label>
         <input
           type="text"
@@ -83,57 +83,53 @@ export default function TripCreateForm() {
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g. Goa or bust 2026"
           required
-          className="w-full rounded-lg border border-black/15 bg-white px-3.5 py-3 text-neutral-900 placeholder-neutral-400 focus:border-emerald-600 focus:outline-none"
+          className="mc-input w-full px-3.5 py-3 placeholder-neutral-400"
         />
       </section>
 
-      <section className="rounded-xl border border-black/10 bg-black/[0.03] p-4">
-        <div className="flex items-center justify-between mb-2">
-          <label className="flex items-center gap-1.5 text-sm font-semibold text-neutral-800">
-            <UserIcon className="h-4 w-4 text-emerald-600" />
-            Who&apos;s going?
+      <section className="mc-slot p-4">
+        <div className="flex items-center justify-between mb-3">
+          <label className="flex items-center gap-2 mc-heading text-[9px] text-[#202020]">
+            <PlayerHeadIcon className="h-5 w-5" />
+            Recruit Party
           </label>
-          <span className="text-xs text-neutral-500">
+          <span className="text-xs text-[#4a4a4a]">
             {memberNamesText.split("\n").map((n) => n.trim()).filter(Boolean).length}{" "}
-            people
+            joined
           </span>
         </div>
-        <p className="text-xs text-neutral-500 mb-2">One name per line.</p>
+        <p className="text-xs text-[#4a4a4a] mb-2">One name per line.</p>
         <textarea
           value={memberNamesText}
           onChange={(e) => setMemberNamesText(e.target.value)}
           rows={5}
           required
-          className="w-full rounded-lg border border-black/15 bg-white px-3.5 py-3 text-neutral-900 placeholder-neutral-400 focus:border-emerald-600 focus:outline-none"
+          className="mc-input w-full px-3.5 py-3 placeholder-neutral-400"
         />
       </section>
 
-      <section className="rounded-xl border border-black/10 bg-black/[0.03] p-4">
-        <label className="flex items-center gap-1.5 text-sm font-semibold text-neutral-800 mb-2">
-          <CalendarIcon className="h-4 w-4 text-emerald-600" />
-          Submission deadline
+      <section className="mc-slot p-4">
+        <label className="flex items-center gap-2 mc-heading text-[9px] text-[#202020] mb-3">
+          <ClockIcon className="h-5 w-5" />
+          Quest Deadline
         </label>
         <input
           type="datetime-local"
           value={deadline}
           onChange={(e) => setDeadline(e.target.value)}
           required
-          className="w-full rounded-lg border border-black/15 bg-white px-3.5 py-3 text-neutral-900 focus:border-emerald-600 focus:outline-none"
+          className="mc-input w-full px-3.5 py-3"
         />
       </section>
 
       {error && (
-        <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+        <p className="text-sm text-white bg-[#b33a3a] border-2 border-black px-3 py-2">
           {error}
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full rounded-lg bg-neutral-900 hover:bg-neutral-700 disabled:opacity-60 disabled:cursor-not-allowed text-[#f5f5f2] font-medium py-3 transition-colors"
-      >
-        {loading ? "Creating..." : "Create trip"}
+      <button type="submit" disabled={loading} className="mc-btn w-full py-4 text-[10px]">
+        {loading ? "Crafting..." : "Start the Quest"}
       </button>
     </form>
   );

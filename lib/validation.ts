@@ -84,7 +84,7 @@ export const geminiOptionSchema = z.object({
 });
 
 export const geminiResponseSchema = z.object({
-  options: z.array(geminiOptionSchema).min(1).max(3),
+  options: z.array(geminiOptionSchema).length(1),
 });
 
 export type GeminiResponse = z.infer<typeof geminiResponseSchema>;

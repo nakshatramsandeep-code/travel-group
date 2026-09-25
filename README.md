@@ -1,16 +1,21 @@
-# Trip Planner
+# Quest Planner
 
-A group trip planner: one link to collect everyone's preferences (budget,
-dates, destination types, hard no's), a rules engine that filters down to
-what actually works for the whole group, and Gemini to rank the top 2-3
-destination options with per-person fit scores. Riya (the coordinator) reviews
-status, generates options, and locks the final decision.
+A group trip planner, reskinned as a Minecraft-inspired quest: one link to
+collect everyone's preferences (budget, dates, biome/destination types, hard
+no's), a rules engine that filters down to what actually works for the whole
+group, and Gemini (the "Oracle") to pick the single best-fit destination with
+per-person fit scores and a day-by-day itinerary. The quest giver (coordinator)
+reviews party readiness, consults the Oracle, and seals the final decision.
+
+The visual theme is an original pixel-art aesthetic inspired by Minecraft's
+UI language (blocky bevelled panels, a stone/grass/dirt palette, a pixel
+font) — it doesn't use any of Mojang's actual game assets, textures, or logo.
 
 ## Stack
 
 - Next.js (App Router) + TypeScript + Tailwind
 - Supabase (Postgres) for storage
-- Gemini API for ranking destination options
+- Gemini API for picking the destination
 - Deployed on Vercel
 
 ## Setup
@@ -23,8 +28,8 @@ status, generates options, and locks the final decision.
 
 2. Create a Supabase project, then run [`supabase/schema.sql`](supabase/schema.sql)
    in the Supabase SQL editor to create the tables. If your project already
-   existed before the itinerary/photos feature was added, also run
-   [`supabase/migrations/002_add_itinerary_images.sql`](supabase/migrations/002_add_itinerary_images.sql).
+   existed before the itinerary feature was added, also run
+   [`supabase/migrations/002_add_itinerary.sql`](supabase/migrations/002_add_itinerary.sql).
 
 3. Copy `.env.example` to `.env.local` and fill in:
 
@@ -49,34 +54,33 @@ status, generates options, and locks the final decision.
 
 ## How it works
 
-1. **Create trip** (`/`) — Riya enters a trip name, the group's names, and a
-   deadline. This creates a trip and returns a private admin link
-   (`/admin/[adminToken]`).
+1. **Start a quest** (`/`) — the coordinator enters a quest name, recruits the
+   party (names), and sets a deadline. This creates a trip and returns a
+   private admin link (`/admin/[adminToken]`).
 2. **Submit preferences** (`/t/[shareToken]`) — shared with the group. Each
    person picks their name from a dropdown, then submits budget range,
-   available date windows, destination types, and hard no's. Editable until
-   the deadline.
-3. **Admin status** (`/admin/[adminToken]`) — shows who's submitted. The
-   "Generate options" button unlocks once everyone has submitted, or the
-   deadline has passed.
-4. **Generate options** — plain code (`lib/rules.ts`) first narrows things
+   available dates, biome preferences, and hard no's. Editable until the
+   deadline.
+3. **Admin status** (`/admin/[adminToken]`) — an XP bar and party roster show
+   who's submitted. "Consult the Oracle" unlocks once everyone has submitted,
+   or the deadline has passed.
+4. **Consult the Oracle** — plain code (`lib/rules.ts`) first narrows things
    down: common available date windows, a budget ceiling set to the lowest
    person's max, and anything hitting a hard no removed. Those filtered
-   constraints are handed to Gemini (`lib/gemini.ts`), which returns 2-3
-   ranked destinations with a 0-10 fit score and one-line reason per person,
+   constraints are handed to Gemini (`lib/gemini.ts`), which picks exactly
+   **one** destination with a 0-10 fit score and one-line reason per person,
    an estimated per-person cost, trade-offs, and a day-by-day itinerary. The
    response is requested as strict JSON and validated with `zod` before
    saving — a bad or failed response surfaces as an error, never a
-   fabricated result. A few real photos per destination are then fetched
-   from Wikipedia (`lib/images.ts`, no API key needed) and saved alongside
-   the option.
-5. **Decision board** (`/t/[shareToken]/board`) — shows the options as cards
-   with photos, dates, a day-by-day itinerary, estimated cost per person,
-   and a color-coded person × option fit-score grid. Anyone with the link
-   can vote once per option set.
-6. **Lock** — Riya confirms a final option from the admin page. The board then
-   shows the locked decision and further writes (submissions, votes,
-   regeneration) are rejected.
+   fabricated result. No images are generated or stored; the recommendation
+   is text-only.
+5. **Decision board** (`/t/[shareToken]/board`) — shows the single
+   recommendation as a quest card with dates, cost, itinerary, and
+   heart-based fit scores per person. Anyone with the link can vote once to
+   confirm it.
+6. **Seal the quest** — the coordinator locks in the destination from the
+   admin page. The board then shows it as sealed and further writes
+   (submissions, votes, re-rolling) are rejected.
 
 ## Deploying to Vercel
 

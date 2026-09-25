@@ -1,3 +1,5 @@
+import { PlayerHeadIcon } from "./icons";
+
 export default function StatusList({
   memberNames,
   submittedMembers,
@@ -7,22 +9,28 @@ export default function StatusList({
 }) {
   return (
     <ul className="flex flex-col gap-2">
-      {memberNames.map((name) => {
+      {memberNames.map((name, i) => {
         const submitted = submittedMembers.includes(name);
         return (
           <li
             key={name}
-            className="flex items-center justify-between rounded-lg border border-black/10 bg-white px-3 py-2"
+            className="flex items-center justify-between bg-white border-2 border-black px-3 py-2"
           >
-            <span className="text-neutral-800 text-sm">{name}</span>
+            <span className="flex items-center gap-2 text-[#202020] text-sm">
+              <PlayerHeadIcon
+                className={`h-6 w-6 ${submitted ? "" : "grayscale opacity-60"}`}
+                seed={i}
+              />
+              {name}
+            </span>
             <span
-              className={`text-xs font-medium px-2 py-1 rounded-full ${
+              className={`text-[9px] mc-heading px-2 py-1.5 border-2 border-black ${
                 submitted
-                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                  : "bg-black/[0.03] text-neutral-500 border border-black/10"
+                  ? "bg-[#6cad3f] text-white"
+                  : "bg-[#c6c6c6] text-[#4a4a4a]"
               }`}
             >
-              {submitted ? "Submitted" : "Waiting"}
+              {submitted ? "Ready" : "Waiting"}
             </span>
           </li>
         );

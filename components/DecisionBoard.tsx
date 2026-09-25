@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Trip, TripOption, Vote } from "@/lib/types";
 import OptionCard from "./OptionCard";
-import FitScoreGrid from "./FitScoreGrid";
 import { SkeletonBoard } from "./Skeleton";
 import { getStoredIdentity, setStoredIdentity } from "@/lib/localIdentity";
 
@@ -112,11 +111,10 @@ export default function DecisionBoard({ shareToken }: { shareToken: string }) {
   }
 
   const { trip, options, votes } = data;
-
-  const voteCounts = options.reduce<Record<string, number>>((acc, opt) => {
-    acc[opt.id] = votes.filter((v) => v.option_id === opt.id).length;
-    return acc;
-  }, {});
+  const option = options[0] as TripOption | undefined;
+  const voteCount = option
+    ? votes.filter((v) => v.option_id === option.id).length
+    : 0;
 
   const myVote = votes.find((v) => v.member_name === voterName)?.option_id;
   const votedMembers = new Set(votes.map((v) => v.member_name));
@@ -125,34 +123,36 @@ export default function DecisionBoard({ shareToken }: { shareToken: string }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="text-center">
-        <h1 className="font-serif text-2xl text-neutral-900">{trip.name}</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="mc-heading text-base sm:text-lg text-[#202020]">
+          {trip.name}
+        </h1>
+        <p className="mt-2 text-sm text-[#4a4a4a]">
           {trip.status === "locked"
-            ? "Decision locked"
+            ? "Quest sealed!"
             : trip.status === "options_generated"
-              ? "Vote for your favourite"
-              : "Waiting for options to be generated"}
+              ? "Vote to confirm the quest"
+              : "Waiting for the Oracle..."}
         </p>
       </div>
 
       {trip.status === "collecting" && (
-        <p className="text-center text-sm text-neutral-500 bg-white border border-black/10 rounded-xl px-4 py-6 shadow-sm">
-          Options haven&apos;t been generated yet. Check back once the
-          coordinator has run it.
+        <p className="text-center text-sm text-[#4a4a4a] mc-panel px-4 py-6">
+          The Oracle hasn&apos;t spoken yet. Check back once the quest giver
+          has consulted it.
         </p>
       )}
 
-      {options.length > 0 && (
+      {option && (
         <>
-          <FitScoreGrid options={options} memberNames={trip.member_names} />
-
           {trip.status !== "locked" && (
-            <div className="flex flex-wrap items-center gap-3">
-              <label className="text-sm text-neutral-600">Voting as</label>
+            <div className="mc-panel p-3 flex flex-wrap items-center gap-3">
+              <label className="text-xs mc-heading text-[#202020]">
+                Voting as
+              </label>
               <select
                 value={voterName}
                 onChange={(e) => setVoterName(e.target.value)}
-                className="rounded-lg border border-black/15 bg-white px-3 py-2 text-neutral-900 focus:border-emerald-600 focus:outline-none"
+                className="mc-input px-3 py-2 text-sm"
               >
                 <option value="">Select your name</option>
                 {trip.member_names.map((n) => (
@@ -161,7 +161,7 @@ export default function DecisionBoard({ shareToken }: { shareToken: string }) {
                   </option>
                 ))}
               </select>
-              <span className="text-xs text-neutral-500">
+              <span className="text-xs text-[#4a4a4a]">
                 {notYetVoted.length === 0
                   ? "Everyone has voted"
                   : `Waiting on: ${notYetVoted.join(", ")}`}
@@ -170,30 +170,23 @@ export default function DecisionBoard({ shareToken }: { shareToken: string }) {
           )}
 
           {error && (
-            <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+            <p className="text-sm text-white bg-[#b33a3a] border-2 border-black px-3 py-2">
               {error}
             </p>
           )}
 
-          <div className="grid gap-5 sm:grid-cols-2">
-            {options.map((opt) => (
-              <OptionCard
-                key={opt.id}
-                option={opt}
-                rankLabel={`Option ${opt.rank}`}
-                isTopPick={opt.rank === 1}
-                voteCount={voteCounts[opt.id] ?? 0}
-                isWinner={trip.locked_option_id === opt.id}
-                isLocked={trip.status === "locked"}
-                currentUserVoted={myVote === opt.id}
-                onVote={
-                  trip.status === "locked" || voting
-                    ? undefined
-                    : () => castVote(opt.id)
-                }
-              />
-            ))}
-          </div>
+          <OptionCard
+            option={option}
+            voteCount={voteCount}
+            isWinner={trip.locked_option_id === option.id}
+            isLocked={trip.status === "locked"}
+            currentUserVoted={myVote === option.id}
+            onVote={
+              trip.status === "locked" || voting
+                ? undefined
+                : () => castVote(option.id)
+            }
+          />
         </>
       )}
     </div>

@@ -21,7 +21,7 @@ export default async function AdminPage({
 
   return (
     <main className="flex-1 flex flex-col items-center px-4 py-10">
-      <div className="w-full max-w-3xl">
+      <div className="w-full max-w-xl">
         <AdminDashboard adminToken={adminToken} initialTrip={trip} />
       </div>
     </main>

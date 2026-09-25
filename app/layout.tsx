@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Fraunces } from "next/font/google";
+import { Geist, Geist_Mono, Press_Start_2P } from "next/font/google";
 import Header from "@/components/Header";
 import "./globals.css";
 
@@ -13,23 +13,22 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const fraunces = Fraunces({
-  variable: "--font-serif-brand",
+const pixelFont = Press_Start_2P({
+  variable: "--font-press-start",
   subsets: ["latin"],
-  weight: ["400", "500"],
-  style: ["normal", "italic"],
+  weight: "400",
 });
 
 export const metadata: Metadata = {
-  title: "Trip Planner",
-  description: "Pick a group trip everyone actually agrees on.",
+  title: "Quest Planner",
+  description: "Craft the group trip everyone agrees on.",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${fraunces.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${pixelFont.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <Header />

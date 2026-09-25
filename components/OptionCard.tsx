@@ -1,22 +1,13 @@
 import { TripOption } from "@/lib/types";
 import { formatDateRange } from "@/lib/date";
+import { ChestIcon, HeartIcon, MapIcon } from "./icons";
 
-function scoreColor(score: number): string {
-  if (score >= 8) return "text-emerald-700";
-  if (score >= 5) return "text-amber-700";
-  return "text-red-600";
-}
-
-function scoreDotColor(score: number): string {
-  if (score >= 8) return "bg-emerald-500";
-  if (score >= 5) return "bg-amber-500";
-  return "bg-red-500";
+function heartsForScore(score: number): number {
+  return Math.max(0, Math.min(5, Math.round(score / 2)));
 }
 
 export default function OptionCard({
   option,
-  rankLabel,
-  isTopPick,
   voteCount,
   isWinner,
   isLocked,
@@ -24,96 +15,70 @@ export default function OptionCard({
   onVote,
 }: {
   option: TripOption;
-  rankLabel: string;
-  isTopPick?: boolean;
   voteCount: number;
   isWinner: boolean;
   isLocked: boolean;
   currentUserVoted: boolean;
   onVote?: () => void;
 }) {
-  const scores = Object.entries(option.fit_scores);
-  const images = option.images ?? [];
+  const scores = Object.entries(option.fit_scores ?? {});
+  const costs = Object.entries(option.est_cost_per_person ?? {});
   const itinerary = option.itinerary ?? [];
 
   return (
-    <div
-      className={`rounded-2xl border p-5 flex flex-col gap-4 ${
-        isWinner
-          ? "border-emerald-400 bg-emerald-50/60"
-          : "border-black/10 bg-white shadow-sm"
-      }`}
-    >
+    <div className="mc-panel p-5 flex flex-col gap-4">
       <div className="flex items-start justify-between gap-2">
         <div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs uppercase tracking-wide text-neutral-500">
-              {rankLabel}
-            </span>
-            {isTopPick && !isWinner && (
-              <span className="text-[11px] font-medium bg-amber-50 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded-full">
-                Top pick
-              </span>
-            )}
-          </div>
-          <h3 className="font-serif text-lg text-neutral-900">
+          <p className="text-[9px] mc-heading text-[#6b6b6b] mb-1">
+            The Oracle Recommends
+          </p>
+          <h3 className="mc-heading text-base sm:text-lg text-[#202020]">
             {option.destination}
           </h3>
-          <p className="text-sm text-neutral-500">
+          <p className="text-sm text-[#4a4a4a] mt-1">
             {formatDateRange(option.dates.start, option.dates.end)}
           </p>
         </div>
         {isWinner && (
-          <span className="text-xs font-medium bg-neutral-900 text-[#f5f5f2] px-2 py-1 rounded-full whitespace-nowrap">
-            Chosen
+          <span className="text-[9px] mc-heading bg-[#d4a017] text-white px-2 py-1.5 border-2 border-black whitespace-nowrap">
+            Sealed!
           </span>
         )}
       </div>
 
-      {images.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto -mx-1 px-1">
-          {images.map((src, i) => (
-            // eslint-disable-next-line @next/next/no-img-element -- external, unconfigured photo hosts (Wikimedia); a plain img avoids next/image domain config
-            <img
-              key={src}
-              src={src}
-              alt={`${option.destination} photo ${i + 1}`}
-              loading="lazy"
-              className="h-24 w-32 shrink-0 rounded-lg object-cover border border-black/10 bg-black/[0.03]"
-            />
-          ))}
+      {costs.length > 0 && (
+        <div className="mc-slot p-3">
+          <p className="flex items-center gap-1.5 text-[9px] mc-heading text-[#202020] mb-2">
+            <ChestIcon className="h-4 w-4" />
+            Loot Cost / Person (INR)
+          </p>
+          <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-[#202020]">
+            {costs.map(([name, cost]) => (
+              <span key={name}>
+                {name}: ₹{cost.toLocaleString("en-IN")}
+              </span>
+            ))}
+          </div>
         </div>
       )}
 
-      <div>
-        <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">
-          Estimated cost / person (INR)
-        </p>
-        <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-neutral-700">
-          {Object.entries(option.est_cost_per_person).map(([name, cost]) => (
-            <span key={name}>
-              {name}: ₹{cost.toLocaleString("en-IN")}
-            </span>
-          ))}
-        </div>
-      </div>
-
       {itinerary.length > 0 && (
-        <div>
-          <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1.5">
-            Itinerary
+        <div className="mc-slot p-3">
+          <p className="flex items-center gap-1.5 text-[9px] mc-heading text-[#202020] mb-2">
+            <MapIcon className="h-4 w-4" />
+            Quest Log
           </p>
           <ol className="flex flex-col gap-2 text-sm">
             {itinerary.map((day) => (
               <li key={day.day} className="flex gap-2.5">
-                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-black/[0.05] text-[11px] font-semibold text-neutral-600">
+                <span className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center bg-[#6cad3f] border-2 border-black text-[10px] font-bold text-white">
                   {day.day}
                 </span>
                 <span>
-                  <span className="font-medium text-neutral-800">
+                  <span className="font-semibold text-[#202020]">
                     {day.title}
                   </span>{" "}
-                  <span className="text-neutral-500">{day.description}</span>
+                  <span className="text-[#4a4a4a]">{day.description}</span>
                 </span>
               </li>
             ))}
@@ -121,50 +86,53 @@ export default function OptionCard({
         </div>
       )}
 
-      <div>
-        <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">
-          Fit
-        </p>
-        <ul className="flex flex-col gap-1.5 text-sm">
-          {scores.map(([name, entry]) => (
-            <li key={name} className="flex items-start gap-2 text-neutral-700">
-              <span
-                className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${scoreDotColor(entry.score)}`}
-                aria-hidden
-              />
-              <span>
-                <span className={`font-semibold ${scoreColor(entry.score)}`}>
-                  {entry.score}/10
-                </span>{" "}
-                <span className="text-neutral-600">{name}</span> —{" "}
-                <span className="text-neutral-500">{entry.reason}</span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
+      {scores.length > 0 && (
+        <div className="mc-slot p-3">
+          <p className="text-[9px] mc-heading text-[#202020] mb-2">
+            Party Fit
+          </p>
+          <ul className="flex flex-col gap-2 text-sm">
+            {scores.map(([name, entry]) => (
+              <li key={name} className="flex items-start gap-2">
+                <div className="flex shrink-0 gap-0.5 mt-0.5">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <HeartIcon
+                      key={i}
+                      className="h-4 w-4"
+                      filled={i < heartsForScore(entry.score)}
+                    />
+                  ))}
+                </div>
+                <span>
+                  <span className="font-medium text-[#202020]">{name}</span>{" "}
+                  — <span className="text-[#4a4a4a]">{entry.reason}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div>
-        <p className="text-xs uppercase tracking-wide text-neutral-500 mb-1">
-          Trade-offs
+        <p className="text-[9px] mc-heading text-[#6b6b6b] mb-1">
+          Word of Caution
         </p>
-        <p className="text-sm text-neutral-600">{option.tradeoffs}</p>
+        <p className="text-sm text-[#4a4a4a]">{option.tradeoffs}</p>
       </div>
 
-      <div className="flex items-center justify-between pt-2 border-t border-black/10">
-        <span className="text-sm text-neutral-500">
+      <div className="flex items-center justify-between pt-3 border-t-2 border-dashed border-black/20">
+        <span className="flex items-center gap-1.5 text-sm text-[#202020]">
+          <HeartIcon className="h-4 w-4" filled />
           {voteCount} vote{voteCount === 1 ? "" : "s"}
         </span>
         {!isLocked && onVote && (
           <button
             onClick={onVote}
-            className={`text-sm font-medium px-4 py-1.5 rounded-lg transition-colors ${
-              currentUserVoted
-                ? "bg-neutral-900 text-[#f5f5f2]"
-                : "border border-black/15 text-neutral-700 hover:border-emerald-600"
+            className={`mc-btn text-[9px] px-4 py-2.5 ${
+              currentUserVoted ? "" : "mc-btn-stone"
             }`}
           >
-            {currentUserVoted ? "Your vote" : "Vote"}
+            {currentUserVoted ? "Your Vote!" : "Vote"}
           </button>
         )}
       </div>

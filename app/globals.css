@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f5f5f2;
-  --foreground: #171717;
+  --background: #a8dcf0;
+  --foreground: #202020;
 }
 
 @theme inline {
@@ -10,11 +10,124 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-serif-brand);
+  --font-pixel: var(--font-press-start);
 }
 
 body {
-  background: var(--background);
+  background: linear-gradient(#8ecae6 0%, #bfe6f5 55%, #bfe6f5 100%);
   color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+  image-rendering: pixelated;
+}
+
+@keyframes mc-toast-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 20px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* A blocky grass/dirt strip used to cap panels or sections, evoking a
+   Minecraft ground line without using any actual game assets. */
+.mc-groundline {
+  height: 10px;
+  background-image: repeating-linear-gradient(
+    90deg,
+    #6cad3f 0px,
+    #6cad3f 10px,
+    #5d9a35 10px,
+    #5d9a35 20px
+  );
+  border-top: 3px solid #3f7a24;
+  border-bottom: 3px solid #4a3018;
+}
+
+@layer components {
+  .mc-panel {
+    background: #c6c6c6;
+    border: 3px solid #000;
+    box-shadow:
+      inset 3px 3px 0 rgba(255, 255, 255, 0.6),
+      inset -3px -3px 0 rgba(0, 0, 0, 0.35);
+  }
+
+  .mc-panel-dark {
+    background: #373737;
+    border: 3px solid #000;
+    box-shadow:
+      inset 3px 3px 0 rgba(255, 255, 255, 0.08),
+      inset -3px -3px 0 rgba(0, 0, 0, 0.5);
+  }
+
+  .mc-slot {
+    background: #8b8b8b;
+    border: 2px solid #000;
+    box-shadow:
+      inset 2px 2px 0 rgba(0, 0, 0, 0.45),
+      inset -2px -2px 0 rgba(255, 255, 255, 0.25);
+  }
+
+  .mc-input {
+    background: #ffffff;
+    color: #202020;
+    border: 2px solid #000;
+    box-shadow:
+      inset 2px 2px 0 rgba(0, 0, 0, 0.25),
+      inset -1px -1px 0 rgba(255, 255, 255, 0.6);
+  }
+  .mc-input:focus {
+    outline: none;
+    box-shadow:
+      inset 2px 2px 0 rgba(0, 0, 0, 0.25),
+      inset -1px -1px 0 rgba(255, 255, 255, 0.6),
+      0 0 0 3px #ffd700;
+  }
+
+  .mc-btn {
+    font-family: var(--font-pixel);
+    letter-spacing: 0.02em;
+    color: #ffffff;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.35);
+    background: #6cad3f;
+    border: 3px solid #000;
+    box-shadow:
+      inset 2px 2px 0 rgba(255, 255, 255, 0.4),
+      inset -3px -3px 0 rgba(0, 0, 0, 0.35),
+      4px 4px 0 rgba(0, 0, 0, 0.3);
+    transition: transform 0.05s ease;
+  }
+  .mc-btn:hover:not(:disabled) {
+    filter: brightness(1.08);
+  }
+  .mc-btn:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow:
+      inset 2px 2px 0 rgba(0, 0, 0, 0.35),
+      inset -2px -2px 0 rgba(255, 255, 255, 0.15);
+  }
+  .mc-btn:disabled {
+    filter: grayscale(0.6);
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .mc-btn-stone {
+    background: #9a9a9a;
+  }
+  .mc-btn-red {
+    background: #b33a3a;
+  }
+  .mc-btn-gold {
+    background: #d4a017;
+  }
+
+  .mc-heading {
+    font-family: var(--font-pixel);
+    letter-spacing: 0.02em;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.25);
+  }
 }

@@ -1,9 +1,9 @@
 import TripCreateForm from "@/components/TripCreateForm";
 
 const STEPS = [
-  { label: "Create", detail: "Name the trip and the group" },
-  { label: "Collect", detail: "Everyone shares one link" },
-  { label: "Decide", detail: "Vote on the top picks" },
+  { label: "Create", detail: "Name your quest & party" },
+  { label: "Recruit", detail: "Everyone shares one link" },
+  { label: "Embark", detail: "Vote and lock the destination" },
 ];
 
 export default function Home() {
@@ -11,35 +11,32 @@ export default function Home() {
     <main className="flex-1 flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="font-serif text-3xl text-neutral-900">
-            Plan the trip everyone agrees on
+          <h1 className="mc-heading text-xl sm:text-2xl leading-relaxed text-[#202020]">
+            Plan the Quest Everyone Agrees On
           </h1>
-          <p className="mt-3 text-sm text-neutral-600">
-            One link for your group. Everyone submits their preferences, we
-            find the trips that actually work for everyone.
+          <p className="mt-4 text-sm text-[#2f2f2f]">
+            One link for your party. Everyone submits their preferences, and
+            the Oracle finds the one destination that fits everyone.
           </p>
         </div>
 
         <div className="mb-6 grid grid-cols-3 gap-2">
           {STEPS.map((step, i) => (
-            <div
-              key={step.label}
-              className="rounded-xl border border-black/10 bg-black/[0.03] px-2 py-3 text-center"
-            >
-              <div className="mx-auto mb-1.5 flex h-5 w-5 items-center justify-center rounded-full bg-neutral-900 text-[11px] font-semibold text-[#f5f5f2]">
+            <div key={step.label} className="mc-panel px-2 py-3 text-center">
+              <div className="mx-auto mb-1.5 flex h-6 w-6 items-center justify-center bg-[#6cad3f] border-2 border-black text-[10px] font-bold text-white mc-heading">
                 {i + 1}
               </div>
-              <p className="text-xs font-medium text-neutral-800">
+              <p className="mc-heading text-[9px] text-[#202020]">
                 {step.label}
               </p>
-              <p className="mt-0.5 text-[11px] leading-tight text-neutral-500">
+              <p className="mt-1 text-[11px] leading-tight text-[#4a4a4a]">
                 {step.detail}
               </p>
             </div>
           ))}
         </div>
 
-        <div className="bg-white border border-black/10 rounded-2xl p-6 shadow-sm">
+        <div className="mc-panel p-6">
           <TripCreateForm />
         </div>
       </div>

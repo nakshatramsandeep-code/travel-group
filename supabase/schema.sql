@@ -42,7 +42,6 @@ create table if not exists options (
   fit_scores            jsonb not null,
   tradeoffs             text not null,
   itinerary             jsonb not null default '[]',
-  images                jsonb not null default '[]',
   generated_at          timestamptz not null default now()
 );
 

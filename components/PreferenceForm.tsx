@@ -9,11 +9,11 @@ import {
 } from "@/lib/types";
 import { getStoredIdentity, setStoredIdentity } from "@/lib/localIdentity";
 import {
-  WalletIcon,
-  CalendarIcon,
+  ChestIcon,
+  ClockIcon,
   CompassIcon,
-  BanIcon,
-  UserIcon,
+  TntIcon,
+  PlayerHeadIcon,
   CheckIcon,
 } from "@/components/icons";
 
@@ -194,24 +194,24 @@ export default function PreferenceForm({
   return (
     <div className="flex flex-col gap-5">
       {isReadOnly && (
-        <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+        <p className="text-sm text-white bg-[#8b8b8b] border-2 border-black px-3 py-2">
           {isLocked
-            ? "This trip's decision is locked — submissions are closed."
-            : "The submission deadline has passed."}
+            ? "This quest is sealed — submissions are closed."
+            : "The quest deadline has passed."}
         </p>
       )}
 
       <div>
-        <label className="flex items-center gap-1.5 text-sm font-medium text-neutral-700 mb-1.5">
-          <UserIcon className="h-4 w-4 text-neutral-400" />
-          Which one are you?
+        <label className="flex items-center gap-2 mc-heading text-[9px] text-[#202020] mb-2">
+          <PlayerHeadIcon className="h-5 w-5" />
+          Which Adventurer Are You?
         </label>
         <div className="relative">
           <select
             value={memberName}
             onChange={(e) => setMemberName(e.target.value)}
             disabled={isReadOnly}
-            className="w-full appearance-none rounded-xl border border-black/15 bg-white px-3.5 py-3 pr-9 text-neutral-900 focus:border-emerald-600 focus:outline-none disabled:opacity-60"
+            className="mc-input w-full appearance-none px-3.5 py-3 pr-9 disabled:opacity-60"
           >
             <option value="">Select your name</option>
             {memberNames.map((n) => (
@@ -223,7 +223,7 @@ export default function PreferenceForm({
           <svg
             viewBox="0 0 24 24"
             fill="none"
-            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400"
+            className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-500"
           >
             <path
               d="M6 9l6 6 6-6"
@@ -239,12 +239,12 @@ export default function PreferenceForm({
       {memberName && (
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           {loadingExisting && (
-            <p className="text-sm text-neutral-500">Loading your answers…</p>
+            <p className="text-sm text-[#4a4a4a]">Loading your answers…</p>
           )}
 
           {hasExisting && !loadingExisting && (
-            <p className="flex items-center gap-1.5 text-xs text-emerald-700">
-              <CheckIcon className="h-3.5 w-3.5" />
+            <p className="flex items-center gap-1.5 text-xs text-[#2f6b1f] font-medium">
+              <CheckIcon className="h-4 w-4" />
               You&apos;ve already submitted — editing will update your answers.
             </p>
           )}
@@ -253,14 +253,14 @@ export default function PreferenceForm({
             disabled={isReadOnly || loadingExisting}
             className="flex flex-col gap-4"
           >
-            <section className="rounded-xl border border-black/10 bg-black/[0.03] p-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-800 mb-3">
-                <WalletIcon className="h-4 w-4 text-emerald-600" />
-                Budget per person (INR)
+            <section className="mc-slot p-4">
+              <h3 className="flex items-center gap-2 mc-heading text-[9px] text-[#202020] mb-3">
+                <ChestIcon className="h-5 w-5" />
+                Budget / Person (INR)
               </h3>
               <div className="flex gap-3">
                 <div className="relative w-1/2">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">
                     ₹
                   </span>
                   <input
@@ -269,11 +269,11 @@ export default function PreferenceForm({
                     placeholder="Min"
                     value={budgetMin}
                     onChange={(e) => setBudgetMin(e.target.value)}
-                    className="w-full rounded-lg border border-black/15 bg-white pl-7 pr-3 py-2.5 text-neutral-900 placeholder-neutral-400 focus:border-emerald-600 focus:outline-none"
+                    className="mc-input w-full pl-7 pr-3 py-2.5"
                   />
                 </div>
                 <div className="relative w-1/2">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500">
                     ₹
                   </span>
                   <input
@@ -282,22 +282,22 @@ export default function PreferenceForm({
                     placeholder="Max"
                     value={budgetMax}
                     onChange={(e) => setBudgetMax(e.target.value)}
-                    className="w-full rounded-lg border border-black/15 bg-white pl-7 pr-3 py-2.5 text-neutral-900 placeholder-neutral-400 focus:border-emerald-600 focus:outline-none"
+                    className="mc-input w-full pl-7 pr-3 py-2.5"
                   />
                 </div>
               </div>
             </section>
 
-            <section className="rounded-xl border border-black/10 bg-black/[0.03] p-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-800 mb-3">
-                <CalendarIcon className="h-4 w-4 text-emerald-600" />
-                When are you available?
+            <section className="mc-slot p-4">
+              <h3 className="flex items-center gap-2 mc-heading text-[9px] text-[#202020] mb-3">
+                <ClockIcon className="h-5 w-5" />
+                Available Dates
               </h3>
               <div className="flex flex-col gap-2">
                 {dateRanges.map((r, idx) => (
                   <div
                     key={idx}
-                    className="flex items-center gap-2 rounded-lg border border-black/10 bg-white p-2"
+                    className="flex items-center gap-2 bg-[#e8e8e8] border-2 border-black p-2"
                   >
                     <input
                       type="date"
@@ -305,9 +305,9 @@ export default function PreferenceForm({
                       onChange={(e) =>
                         updateRange(idx, "start", e.target.value)
                       }
-                      className="min-w-0 flex-1 rounded-md border border-black/15 bg-white px-2.5 py-2 text-sm text-neutral-900 focus:border-emerald-600 focus:outline-none"
+                      className="mc-input min-w-0 flex-1 px-2.5 py-2 text-sm"
                     />
-                    <span className="shrink-0 text-neutral-400 text-xs">
+                    <span className="shrink-0 text-neutral-500 text-xs">
                       to
                     </span>
                     <input
@@ -316,13 +316,13 @@ export default function PreferenceForm({
                       onChange={(e) =>
                         updateRange(idx, "end", e.target.value)
                       }
-                      className="min-w-0 flex-1 rounded-md border border-black/15 bg-white px-2.5 py-2 text-sm text-neutral-900 focus:border-emerald-600 focus:outline-none"
+                      className="mc-input min-w-0 flex-1 px-2.5 py-2 text-sm"
                     />
                     {dateRanges.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeRange(idx)}
-                        className="shrink-0 rounded-md p-1.5 text-neutral-400 hover:bg-red-50 hover:text-red-600 transition-colors"
+                        className="shrink-0 bg-[#b33a3a] border-2 border-black text-white px-2 py-1.5 text-xs font-bold hover:brightness-110"
                         aria-label="Remove date range"
                       >
                         ✕
@@ -333,21 +333,21 @@ export default function PreferenceForm({
                 <button
                   type="button"
                   onClick={addRange}
-                  className="self-start rounded-lg border border-dashed border-black/20 px-3 py-1.5 text-sm text-emerald-700 hover:border-emerald-600 hover:text-emerald-800 transition-colors"
+                  className="mc-btn mc-btn-stone self-start px-3 py-2 text-[9px]"
                 >
-                  + Add another window
+                  + Add Window
                 </button>
               </div>
             </section>
 
-            <section className="rounded-xl border border-black/10 bg-black/[0.03] p-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-800 mb-3">
-                <CompassIcon className="h-4 w-4 text-emerald-600" />
-                What kind of trip?{" "}
-                <span className="font-normal text-neutral-500">
-                  (pick all you&apos;d enjoy)
-                </span>
+            <section className="mc-slot p-4">
+              <h3 className="flex items-center gap-2 mc-heading text-[9px] text-[#202020] mb-3">
+                <CompassIcon className="h-5 w-5" />
+                Biome Preference
               </h3>
+              <p className="text-xs text-[#4a4a4a] mb-2">
+                Pick all you&apos;d enjoy.
+              </p>
               <div className="flex flex-wrap gap-2">
                 {DESTINATION_TYPES.map((d) => {
                   const active = destinationTypes.includes(d.value);
@@ -356,10 +356,10 @@ export default function PreferenceForm({
                       type="button"
                       key={d.value}
                       onClick={() => toggleDestinationType(d.value)}
-                      className={`flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm border transition-colors ${
+                      className={`flex items-center gap-1.5 px-3.5 py-2 border-2 border-black text-xs font-medium transition-colors ${
                         active
-                          ? "bg-neutral-900 border-neutral-900 text-[#f5f5f2]"
-                          : "border-black/15 bg-white text-neutral-700 hover:border-black/30"
+                          ? "bg-[#6cad3f] text-white"
+                          : "bg-white text-[#202020] hover:bg-[#f0f0f0]"
                       }`}
                     >
                       {active && <CheckIcon className="h-3.5 w-3.5" />}
@@ -370,10 +370,10 @@ export default function PreferenceForm({
               </div>
             </section>
 
-            <section className="rounded-xl border border-black/10 bg-black/[0.03] p-4">
-              <h3 className="flex items-center gap-2 text-sm font-semibold text-neutral-800 mb-3">
-                <BanIcon className="h-4 w-4 text-rose-600" />
-                Hard no&apos;s
+            <section className="mc-slot p-4">
+              <h3 className="flex items-center gap-2 mc-heading text-[9px] text-[#202020] mb-3">
+                <TntIcon className="h-5 w-5" />
+                Forbidden Biomes
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {HARD_NO_OPTIONS.map((opt) => {
@@ -384,22 +384,18 @@ export default function PreferenceForm({
                       key={opt}
                       onClick={() => toggleHardNo(opt)}
                       aria-pressed={active}
-                      className={`flex items-center gap-2 rounded-lg border px-3 py-2.5 text-left text-sm transition-colors ${
+                      className={`flex items-center gap-2 border-2 border-black px-3 py-2.5 text-left text-xs font-medium transition-colors ${
                         active
-                          ? "bg-rose-50 border-rose-300 text-rose-800"
-                          : "border-black/15 bg-white text-neutral-700 hover:border-black/30"
+                          ? "bg-[#c62828] text-white"
+                          : "bg-white text-[#202020] hover:bg-[#f0f0f0]"
                       }`}
                     >
                       <span
-                        className={`flex h-4 w-4 shrink-0 items-center justify-center rounded border ${
-                          active
-                            ? "bg-rose-600 border-rose-600"
-                            : "border-neutral-300"
+                        className={`flex h-4 w-4 shrink-0 items-center justify-center border-2 border-black ${
+                          active ? "bg-white" : "bg-[#e0e0e0]"
                         }`}
                       >
-                        {active && (
-                          <CheckIcon className="h-3 w-3 text-white" />
-                        )}
+                        {active && <CheckIcon className="h-3 w-3" />}
                       </span>
                       {opt}
                     </button>
@@ -411,17 +407,18 @@ export default function PreferenceForm({
                 onChange={(e) => setHardNoNotes(e.target.value)}
                 placeholder="Anything else you definitely don't want..."
                 rows={2}
-                className="mt-3 w-full rounded-lg border border-black/15 bg-white px-3 py-2 text-sm text-neutral-900 placeholder-neutral-400 focus:border-emerald-600 focus:outline-none"
+                className="mc-input mt-3 w-full px-3 py-2 text-sm"
               />
             </section>
 
             {error && (
-              <p className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              <p className="text-sm text-white bg-[#b33a3a] border-2 border-black px-3 py-2">
                 {error}
               </p>
             )}
             {success && (
-              <p className="text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+              <p className="flex items-center gap-2 text-sm text-white bg-[#6cad3f] border-2 border-black px-3 py-2">
+                <CheckIcon className="h-4 w-4" />
                 Saved! You can come back and edit until the deadline.
               </p>
             )}
@@ -429,9 +426,9 @@ export default function PreferenceForm({
             <button
               type="submit"
               disabled={saving}
-              className="w-full rounded-lg bg-neutral-900 hover:bg-neutral-700 disabled:opacity-60 disabled:cursor-not-allowed text-[#f5f5f2] font-medium py-3 transition-colors"
+              className="mc-btn w-full py-4 text-[10px]"
             >
-              {saving ? "Saving..." : hasExisting ? "Update my answers" : "Submit"}
+              {saving ? "Saving..." : hasExisting ? "Update Answers" : "Submit"}
             </button>
           </fieldset>
         </form>
