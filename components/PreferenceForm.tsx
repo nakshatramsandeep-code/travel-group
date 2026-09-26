@@ -12,6 +12,7 @@ import {
   ChestIcon,
   ClockIcon,
   CompassIcon,
+  MapIcon,
   TntIcon,
   PlayerHeadIcon,
   CheckIcon,
@@ -46,6 +47,7 @@ export default function PreferenceForm({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- run once on mount only; re-running on memberNames identity changes would fight the user's own selection
   }, []);
+  const [homeCity, setHomeCity] = useState("");
   const [budgetMin, setBudgetMin] = useState("");
   const [budgetMax, setBudgetMax] = useState("");
   const [dateRanges, setDateRanges] = useState<DateRange[]>([emptyRange()]);
@@ -66,6 +68,7 @@ export default function PreferenceForm({
   const isReadOnly = isLocked || isPastDeadline;
 
   function resetForm() {
+    setHomeCity("");
     setBudgetMin("");
     setBudgetMax("");
     setDateRanges([emptyRange()]);
@@ -93,6 +96,7 @@ export default function PreferenceForm({
       .then((data) => {
         const s = data.submission;
         if (s) {
+          setHomeCity(s.home_city ?? "");
           setBudgetMin(String(s.budget_min));
           setBudgetMax(String(s.budget_max));
           setDateRanges(
@@ -144,6 +148,10 @@ export default function PreferenceForm({
       setError("Select your name first.");
       return;
     }
+    if (!homeCity.trim()) {
+      setError("Enter the city you'll be travelling from.");
+      return;
+    }
     const min = Number(budgetMin);
     const max = Number(budgetMax);
     if (!budgetMin || !budgetMax || min > max) {
@@ -168,6 +176,7 @@ export default function PreferenceForm({
         body: JSON.stringify({
           shareToken,
           memberName,
+          homeCity: homeCity.trim(),
           budgetMin: min,
           budgetMax: max,
           dateRanges: cleanRanges,
@@ -253,6 +262,24 @@ export default function PreferenceForm({
             disabled={isReadOnly || loadingExisting}
             className="flex flex-col gap-4"
           >
+            <section className="mc-slot p-4">
+              <h3 className="flex items-center gap-2 mc-heading text-[9px] text-[#202020] mb-3">
+                <MapIcon className="h-5 w-5" />
+                Home Base
+              </h3>
+              <p className="text-xs text-[#4a4a4a] mb-2">
+                Which city are you travelling from? The Oracle factors this
+                into distance and travel cost.
+              </p>
+              <input
+                type="text"
+                value={homeCity}
+                onChange={(e) => setHomeCity(e.target.value)}
+                placeholder="e.g. Bengaluru"
+                className="mc-input w-full px-3.5 py-3"
+              />
+            </section>
+
             <section className="mc-slot p-4">
               <h3 className="flex items-center gap-2 mc-heading text-[9px] text-[#202020] mb-3">
                 <ChestIcon className="h-5 w-5" />

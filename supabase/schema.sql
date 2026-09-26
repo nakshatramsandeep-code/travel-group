@@ -21,6 +21,7 @@ create table if not exists submissions (
   id                uuid primary key default gen_random_uuid(),
   trip_id           uuid not null references trips(id) on delete cascade,
   member_name       text not null,
+  home_city         text not null default '',
   budget_min        int not null check (budget_min >= 0),
   budget_max        int not null check (budget_max >= budget_min),
   date_ranges       jsonb not null,

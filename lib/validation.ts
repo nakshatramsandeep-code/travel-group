@@ -38,6 +38,7 @@ export const createTripSchema = z
 export const submissionSchema = z.object({
   tripId: z.string().uuid(),
   memberName: z.string().min(1),
+  homeCity: z.string().min(1).max(80),
   budgetMin: z.number().int().nonnegative(),
   budgetMax: z.number().int().nonnegative(),
   dateRanges: z.array(dateRangeSchema).min(1),
@@ -71,8 +72,16 @@ export const geminiOptionSchema = z.object({
     start: z.string().min(1),
     end: z.string().min(1),
   }),
-  estCostPerPerson: z.record(z.string(), z.number().nonnegative()),
-  fitScores: z.record(z.string(), fitScoreEntrySchema),
+  estCostPerPerson: z
+    .record(z.string(), z.number().nonnegative())
+    .refine((m) => Object.keys(m).length > 0, {
+      message: "estCostPerPerson must not be empty",
+    }),
+  fitScores: z
+    .record(z.string(), fitScoreEntrySchema)
+    .refine((m) => Object.keys(m).length > 0, {
+      message: "fitScores must not be empty",
+    }),
   tradeoffs: z.string().min(1),
   itinerary: z.array(itineraryDaySchema).min(1),
 });

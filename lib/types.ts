@@ -47,6 +47,7 @@ export interface Submission {
   id: string;
   trip_id: string;
   member_name: string;
+  home_city: string;
   budget_min: number;
   budget_max: number;
   date_ranges: DateRange[];

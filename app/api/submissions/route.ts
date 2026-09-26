@@ -6,6 +6,7 @@ import { z } from "zod";
 const bodySchema = z.object({
   shareToken: z.string().min(1),
   memberName: z.string().min(1),
+  homeCity: z.string().min(1).max(80),
   budgetMin: z.number().int().nonnegative(),
   budgetMax: z.number().int().nonnegative(),
   dateRanges: z
@@ -56,6 +57,7 @@ export async function POST(req: NextRequest) {
   const {
     shareToken,
     memberName,
+    homeCity,
     budgetMin,
     budgetMax,
     dateRanges,
@@ -92,6 +94,7 @@ export async function POST(req: NextRequest) {
       {
         trip_id: trip.id,
         member_name: memberName,
+        home_city: homeCity,
         budget_min: budgetMin,
         budget_max: budgetMax,
         date_ranges: dateRanges,
