@@ -6,64 +6,95 @@ import { zodErrorMessage } from "./api-helpers";
 
 export class GeminiGenerationError extends Error {}
 
-const RESPONSE_SCHEMA = {
-  type: "object",
-  properties: {
-    options: {
-      type: "array",
-      minItems: 1,
-      maxItems: 1,
-      items: {
+/**
+ * Built per-request with the actual member names as required schema
+ * properties. Gemini's structured-output mode enforces the JSON schema
+ * strictly — a bare `{ type: "object" }` with no declared properties is
+ * trivially satisfied by `{}`, so prose instructions alone ("fill in every
+ * member") aren't reliable. Naming each member as a required property
+ * forces the model to emit a value for all of them.
+ */
+function buildResponseSchema(memberNames: string[]) {
+  const costProperties = Object.fromEntries(
+    memberNames.map((name) => [name, { type: "number", minimum: 0 }])
+  );
+  const fitProperties = Object.fromEntries(
+    memberNames.map((name) => [
+      name,
+      {
         type: "object",
         properties: {
-          destination: { type: "string" },
-          dates: {
-            type: "object",
-            properties: {
-              start: { type: "string" },
-              end: { type: "string" },
-            },
-            required: ["start", "end"],
-          },
-          estCostPerPerson: {
-            type: "object",
-            description:
-              "Map of member name to estimated per-person cost in INR",
-          },
-          fitScores: {
-            type: "object",
-            description:
-              "Map of member name to { score: 0-10, reason: string }",
-          },
-          tradeoffs: { type: "string" },
-          itinerary: {
-            type: "array",
-            description:
-              "One entry per day of the trip, in order, covering the full date range",
-            items: {
+          score: { type: "number", minimum: 0, maximum: 10 },
+          reason: { type: "string" },
+        },
+        required: ["score", "reason"],
+      },
+    ])
+  );
+
+  return {
+    type: "object",
+    properties: {
+      options: {
+        type: "array",
+        minItems: 1,
+        maxItems: 1,
+        items: {
+          type: "object",
+          properties: {
+            destination: { type: "string" },
+            dates: {
               type: "object",
               properties: {
-                day: { type: "integer" },
-                title: { type: "string" },
-                description: { type: "string" },
+                start: { type: "string" },
+                end: { type: "string" },
               },
-              required: ["day", "title", "description"],
+              required: ["start", "end"],
+            },
+            estCostPerPerson: {
+              type: "object",
+              description:
+                "Map of member name to estimated per-person cost in INR. Must have every member listed below, no exceptions.",
+              properties: costProperties,
+              required: memberNames,
+            },
+            fitScores: {
+              type: "object",
+              description:
+                "Map of member name to { score: 0-10, reason: string }. Must have every member listed below, no exceptions.",
+              properties: fitProperties,
+              required: memberNames,
+            },
+            tradeoffs: { type: "string" },
+            itinerary: {
+              type: "array",
+              description:
+                "One entry per day of the trip, in order, covering the full date range",
+              items: {
+                type: "object",
+                properties: {
+                  day: { type: "integer" },
+                  title: { type: "string" },
+                  description: { type: "string" },
+                },
+                required: ["day", "title", "description"],
+              },
             },
           },
+          required: [
+            "destination",
+            "dates",
+            "estCostPerPerson",
+            "fitScores",
+            "tradeoffs",
+            "itinerary",
+          ],
         },
-        required: [
-          "destination",
-          "dates",
-          "estCostPerPerson",
-          "fitScores",
-          "tradeoffs",
-          "itinerary",
-        ],
       },
     },
-  },
-  required: ["options"],
-};
+    required: ["options"],
+  };
+}
 
 function buildPrompt(
   constraints: FilteredConstraints,
@@ -135,6 +166,9 @@ export async function generateTripOptions(
 
   const ai = new GoogleGenAI({ apiKey });
   const prompt = buildPrompt(constraints, submissions);
+  const responseSchema = buildResponseSchema(
+    submissions.map((s) => s.member_name)
+  );
 
   let rawText: string;
   try {
@@ -143,7 +177,7 @@ export async function generateTripOptions(
       contents: prompt,
       config: {
         responseMimeType: "application/json",
-        responseSchema: RESPONSE_SCHEMA,
+        responseSchema,
       },
     });
     rawText = result.text ?? "";
