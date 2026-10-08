@@ -7,9 +7,7 @@ import { CompassIcon, PlayerHeadIcon, ClockIcon } from "@/components/icons";
 export default function TripCreateForm() {
   const router = useRouter();
   const [name, setName] = useState("");
-  const [memberNamesText, setMemberNamesText] = useState(
-    "Riya\nSiddharth\nKaran\nAisha\nPreethi"
-  );
+  const [memberNamesText, setMemberNamesText] = useState("");
   const [deadline, setDeadline] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -104,6 +102,7 @@ export default function TripCreateForm() {
           onChange={(e) => setMemberNamesText(e.target.value)}
           rows={5}
           required
+          placeholder={"Alex\nSam\nJordan"}
           className="mc-input w-full px-3.5 py-3 placeholder-neutral-400"
         />
       </section>
