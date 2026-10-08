@@ -225,8 +225,8 @@ export default function AdminDashboard({
             {confirmingRegenerate ? (
               <div className="flex flex-col gap-2 bg-[#d4a017] border-2 border-black p-3">
                 <p className="text-sm text-white font-medium">
-                  Re-rolling the Oracle will replace the current
-                  recommendation. Continue?
+                  Re-rolling asks the Oracle for a different destination and
+                  rules out the ones it already suggested. Continue?
                 </p>
                 <div className="flex gap-2">
                   <button

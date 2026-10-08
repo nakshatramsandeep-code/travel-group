@@ -98,7 +98,8 @@ function buildResponseSchema(memberNames: string[]) {
 
 function buildPrompt(
   constraints: FilteredConstraints,
-  submissions: Submission[]
+  submissions: Submission[],
+  previousDestinations: string[]
 ): string {
   const memberSummaries = submissions
     .map((s) => {
@@ -143,7 +144,13 @@ Pre-filtered constraints (already computed with plain code, do not contradict th
 Travel distance and duration matter: the group is departing from ${homeCities.length > 0 ? homeCities.join(", ") : "unspecified cities"}. Factor in realistic travel time/distance from ALL of these cities to the destination, and weigh that against how many days are actually available (${longestWindowDays || "unknown"} day(s)). Do not recommend a destination that would require more travel time than the trip has days for (e.g. don't send a 1-2 day trip somewhere that needs a full day of travel each way). Prefer destinations that are reasonably reachable for everyone given the group's combined starting points, and mention any meaningful travel-time imbalance between members in the trade-offs.
 
 Task: pick exactly ONE specific real destination (e.g. "Goa", "Munnar", "Rishikesh") — the single best fit for the whole group — that fits within the date windows and budget ceiling above, and respects every hard no. Do not suggest anything on the excluded list. Return only one option, not several.
-
+${
+  previousDestinations.length > 0
+    ? `
+The group has already seen and rejected these destinations, so do NOT recommend any of them (or any place inside or right next to them) again: ${previousDestinations.join(", ")}. Choose a genuinely different destination that is still the best remaining fit for the whole group.
+`
+    : ""
+}
 For that option return:
 - destination: the place name
 - dates: a specific start/end date within one of the common windows
@@ -155,9 +162,18 @@ For that option return:
 Return strict JSON only, matching the provided schema. Do not include any text outside the JSON.`;
 }
 
+function isRepeat(destination: string, previous: string[]): boolean {
+  const d = destination.trim().toLowerCase();
+  return previous.some((p) => {
+    const q = p.trim().toLowerCase();
+    return d === q || d.includes(q) || q.includes(d);
+  });
+}
+
 export async function generateTripOptions(
   constraints: FilteredConstraints,
-  submissions: Submission[]
+  submissions: Submission[],
+  previousDestinations: string[] = []
 ): Promise<GeminiResponse> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
@@ -165,7 +181,7 @@ export async function generateTripOptions(
   }
 
   const ai = new GoogleGenAI({ apiKey });
-  const prompt = buildPrompt(constraints, submissions);
+  const prompt = buildPrompt(constraints, submissions, previousDestinations);
   const responseSchema = buildResponseSchema(
     submissions.map((s) => s.member_name)
   );
@@ -204,6 +220,11 @@ export async function generateTripOptions(
   }
 
   const option = validated.data.options[0];
+  if (isRepeat(option.destination, previousDestinations)) {
+    throw new GeminiGenerationError(
+      `The Oracle suggested ${option.destination} again, which was already ruled out. Try re-rolling once more.`
+    );
+  }
   const memberNames = submissions.map((s) => s.member_name);
   const missingCost = memberNames.filter(
     (name) => !(name in option.estCostPerPerson)

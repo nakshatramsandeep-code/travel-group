@@ -50,11 +50,24 @@ export async function POST(
 
   const constraints = buildFilteredConstraints(submissions as Submission[]);
 
+  // Earlier recommendations are kept (not deleted) so a re-roll can rule
+  // them all out instead of cycling back to the same place.
+  const { data: previousOptions } = await supabase
+    .from("options")
+    .select("destination, rank")
+    .eq("trip_id", trip.id);
+  const previousDestinations = (previousOptions ?? []).map(
+    (o) => o.destination as string
+  );
+  const nextRank =
+    (previousOptions ?? []).reduce((max, o) => Math.max(max, o.rank), 0) + 1;
+
   let generated;
   try {
     generated = await generateTripOptions(
       constraints,
-      submissions as Submission[]
+      submissions as Submission[],
+      previousDestinations
     );
   } catch (err) {
     if (err instanceof GeminiGenerationError) {
@@ -63,12 +76,9 @@ export async function POST(
     throw err;
   }
 
-  // Clear the previous recommendation before saving the fresh one.
-  await supabase.from("options").delete().eq("trip_id", trip.id);
-
   const rows = generated.options.map((opt, idx) => ({
     trip_id: trip.id,
-    rank: idx + 1,
+    rank: nextRank + idx,
     destination: opt.destination,
     dates: opt.dates,
     est_cost_per_person: opt.estCostPerPerson,

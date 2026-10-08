@@ -29,7 +29,8 @@ export async function GET(
     .from("options")
     .select("*")
     .eq("trip_id", trip.id)
-    .order("rank", { ascending: true });
+    .order("rank", { ascending: false })
+    .limit(1);
 
   return NextResponse.json({
     trip,
